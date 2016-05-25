@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<Dat>
+  <Game RomName="Tekken 3 (USA)" NumPlayers="4" Alternating="0">
+    <Player Number="1">
+      <Labels>
+        <Label Name="P1_X"  Value="Punch" Color="Red" />
+        <Label Name="P1_O"  Value="Kick" Color="Yellow" />
+        <Label Name="P1_SQ" Value="Jump" Color="Red" />
+        <Label Name="P1_TR" Value="Special" Color="Red" />
+      </Labels>
+    </Player>
+    <Player Number="2">
+      <Labels>
+        <Label Name="P2_X"  Value="Punch" Color="Red" />
+        <Label Name="P2_O"  Value="Kick" Color="Yellow" />
+        <Label Name="P2_SQ" Value="Jump" Color="Red" />
+        <Label Name="P2_TR" Value="Special" Color="Red" />
+      </Labels>
+    </Player>
+    <Player Number="3">
+      <Labels>
+        <Label Name="P3_X"  Value="Punch" Color="Red" />
+        <Label Name="P3_O"  Value="Kick" Color="Yellow" />
+        <Label Name="P3_SQ" Value="Jump" Color="Red" />
+        <Label Name="P3_TR" Value="Special" Color="Red" />
+      </Labels>
+    </Player>
+    <Player Number="4">
+      <Labels>
+        <Label Name="P4_X"  Value="Punch" Color="Red" />
+        <Label Name="P4_O" Value="Kick" Color="Yellow" />
+        <Label Name="P4_SQ" Value="Jump" Color="Red" />
+        <Label Name="P4_TR" Value="Special" Color="Red" />
+      </Labels>
+    </Player>
+  </Game>
+</Dat>
