@@ -284,6 +284,7 @@ def main():
 	if args.emulator == _TEST_SECTION:
 		mask = getPinMask(args.emulator, [args.rom])
 		sendPinMask(mask, args.printonly)
+		return
 	else:
 		blist = getButtonList(args.emulator, args.rom)
 	
@@ -299,7 +300,7 @@ def main():
 	pinMask = getPinMask(args.emulator, blist)
 	
 	# Flash the buttons to tell the user a default was used
-	if enableFlashIndicator & args.noflash == False:
+	if enableFlashIndicator and args.noflash == False:
 		for index in range(0, _config.getint(_SETTINGS_SECTION, "not_found_flash_count")):
 			sendPinMask(pinMask, args.printonly)
 			time.sleep(_I2C_FLASH_INTERVAL)
