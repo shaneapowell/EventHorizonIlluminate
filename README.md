@@ -1,4 +1,10 @@
 
+INCOMPLETE.. Please check back soon!!
+This project is a work in progress with very active development.  Please be patient and check back soon for a complete and useable tool.
+
+
+
+
 
 
 INSTALL:
