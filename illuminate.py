@@ -30,6 +30,8 @@ from configparser import ConfigParser
 import smbus
 import logging
 
+
+# Constants
 _SETTINGS_SECTION="settings"
 _TEST_SECTION="TEST"
 _PINS_SECTION="pins"
@@ -42,6 +44,8 @@ _I2C_LATCH_BANK0 = 0x12
 _I2C_LATCH_BANK1 = 0x13
 _I2C_ALL_OFF_PINMASK = 0x0000
 _I2C_FLASH_INTERVAL = 0.200
+
+# Class variables
 _basePath=None
 _config=None
 
@@ -182,7 +186,7 @@ def getButtonPin(emulatorName, buttonName):
 		pin = _config.get(_PINS_SECTION, btnCode)
 		logging.debug("Found Pin:[%s] in section:[%s] for button:[%s]" % (pin, _PINS_SECTION, btnCode))
 	except:
-		logging.debug("Pin not found in [%s] for emulator:[%s] button:[%s] . Skipping" % (_CONFIG_FILE, emulatorName, buttonName))
+		logging.error("Pin not found in [%s] for emulator:[%s] button:[%s] . Skipping" % (_CONFIG_FILE, emulatorName, buttonName))
 		return -1
 	return int(pin)
 
@@ -209,23 +213,28 @@ def loadConfig():
 '''
 '''
 def main():
-	parser = argparse.ArgumentParser(description="Game Console LED Controller. To manually test lights, use 'TEST' for emulator and the button name from the 'pins' section in the config.\n\n example:  illuminate.py -d TEST B3")
+	parser = argparse.ArgumentParser(description="Game Console LED Controller. To manually test lights, use 'TEST' for <system> and the button name from the 'pins' section in the config.\n\n example:  illuminate.py -d TEST B3")
 	parser.add_argument("-c", "--config", dest="configdir", default=os.path.dirname(os.path.realpath(__file__)), help="Path to location of all xml conf files. Default is the directory this script is located.")
 	parser.add_argument("-p", "--printonly", action="store_true", default=False, help="Print result only, don't send LED lightup commands through i2c bus")
-	parser.add_argument("-q", "--quiet", action="store_true", default=False, help="Disalbe Debugging logging, show INFO only.")
-	parser.add_argument("-f", "--noflash", action="store_true", default=False, help="Force disable flashing of lights when default buttons are enabled")
-	parser.add_argument("emulator", help="The name of the emulator being run 'DEBUG' to try manually setting LED")
-	parser.add_argument("rom", help="The rom being run. When using the 'DEBUG' emulator option, pass in an int value from 0 to 16 to manually set a LED")
+	parser.add_argument("-d", "--debug", action="store_true", default=False, help="Enable Debugging logging.")
+	parser.add_argument("-f", "--noflash", action="store_true", default=False, help="Force disable flashing of lights when button LEDs are enabled")
+	parser.add_argument("system", help="The name of the emulator system being run. eg.. 'mame-mame4all', 'psx', 'snes'...etc.  Use 'TEST' to test specific buttons.")
+	parser.add_argument("rom", help="The rom being run. When using the 'TEST' emulator option, pass in B1 to B16 to manually turn on a LED")
 	args = parser.parse_args()
 		
 	global _basePath
 	global _config
 	
+	systemName = args.system
+	romName = args.rom
+	
+	logging.info("System:[%s] ROM:[%s]")
+	
 	# Find the path to this script file, to find all necessary data files.
 	_basePath = args.configdir
 			
 	# Alter the desired verbosity of the output logging
-	if args.quiet == False:
+	if args.debug == True:
 		logging.basicConfig(level=logging.DEBUG)
 	else:
 		logging.basicConfig(level=logging.INFO)
@@ -234,36 +243,50 @@ def main():
 	loadConfig()
 	
 	# TODO: To compensate for the slow(ish) load times of Mame, lets' fire up a background thread that animates the buttons
-	
+		
 	# Special Case emulator "TEST" bypasses the xml lookup, and directly sets the button by name 
-	if args.emulator == _TEST_SECTION:
-		mask = getPinMask(args.emulator, [args.rom])
+	if systemName == _TEST_SECTION:
+		mask = getPinMask(systemName, [romName])
 		sendPinMask(mask, args.printonly)
 		return
+	
+	
+	# Check that a config.ini section exists for the desired emulator.  If it doesn't, default to ALL buttons.
+	blist = None
+	if _config.has_section(systemName) == False:
+		logging.warning("%s file missing section for system:[%s], defaulting to ALL buttons" %(_CONFIG_FILE, systemName))
+		systemName = _TEST_SECTION
 	else:
-		blist = getButtonList(args.emulator, args.rom)
+		# Obtain the list of buttons from the system.xml file
+		blist = getButtonList(systemName, romName)
+	
 	
 	# If no buttons were found, lets' generate one from the config.ini.  Simply turn on all known buttons.
-	enableFlashIndicator = False
+	enableFallbackFlashIndicator = False
 	if blist == None:
-		enableFlashIndicator = True
-		logging.info("No Button list found for emulator:[%s] rom:[%s], generating a default list." % (args.emulator, args.rom))
+		enableFallbackFlashIndicator = True
+		logging.warning("No Button list found for emulator:[%s] rom:[%s], generating a default list." % (systemName, romName))
 		blist = []
-		for btn in _config.items(args.emulator):
+		
+		# If no mapping section exists for an emulator, fall back to ALL buttons
+		if _config.has_section(systemName) == False:
+			systemName = _TEST_SECTION
+			
+		for btn in _config.items(systemName):
 			blist.append(btn[0])
 		
 	# Generate a pin mask for the desired buttons 
-	pinMask = getPinMask(args.emulator, blist)
+	pinMask = getPinMask(systemName, blist)
 	
 	# Flash the buttons to tell the user a default was used
-	if enableFlashIndicator and args.noflash == False:
-		for index in range(0, _config.getint(_SETTINGS_SECTION, "not_found_flash_count")):
+	if enableFallbackFlashIndicator and args.noflash == False:
+		for index in range(0, 4):
 			sendPinMask(pinMask, args.printonly)
 			time.sleep(_I2C_FLASH_INTERVAL)
 			sendPinMask(_I2C_ALL_OFF_PINMASK, args.printonly)
 			time.sleep(_I2C_FLASH_INTERVAL)
-	else:
-		# Quick-Flash the buttons to indicate a success
+	elif args.noflash == False:
+		# Quick-Flash the buttons to indicate an accurate mapping
 		for index in range(0, 2):
 			sendPinMask(pinMask, args.printonly)
 			time.sleep(_I2C_FLASH_INTERVAL/2)
