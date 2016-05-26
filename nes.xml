@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<Dat>
+  <Game RomName="Super Mario Bros. (Japan, USA)" NumPlayers="2" Alternating="0">
+    <Player Number="1">
+      <Labels>
+        <Label Name="P1_A"  Value="Jump" Color="Red" />
+        <Label Name="P1_B"  Value="Jump" Color="Yellow" />
+      </Labels>
+    </Player>
+    <Player Number="2">
+      <Labels>
+        <Label Name="P2_A"  Value="Jump" Color="Red" />
+        <Label Name="P2_B"  Value="Jump" Color="Yellow" />
+      </Labels>
+    </Player>
+  </Game>
+</Dat>

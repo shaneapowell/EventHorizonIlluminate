@@ -24205,7 +24205,7 @@ Don't Pull: A = Push Block, B = Push Block</MiscDetails>
       </Labels>
     </Player>
   </Game>
-  <Game RomName="rygarj" GameName="Argus no Senshi (Japan)" NumPlayers="2" Alternating="0" Mirrored="0" UsesService="0" Tilt="0" Cocktail="1">
+  <Game RomName="rygarj" GameName="Argus no Senshi (Japan)" NumPlayers="2" Alternating="1" Mirrored="0" UsesService="0" Tilt="0" Cocktail="1">
     <Status Verified="0" />
     <MiscDetails />
     <Player Number="1" NumButtons="2">

@@ -45,68 +45,12 @@ _I2C_FLASH_INTERVAL = 0.200
 _basePath=None
 _config=None
 
-'''
-'''
-def test():
-	# Required Parameters
-	if len(sys.argv) != 4:
-		print("usage: illuminate.py <controls.xml> <nplayers.ini> <romname>")
-		print("\texample:\n\t\tilluminate.py /etc/controls.xml /etc/nplayers.ini doubledr")
-		exit(0)
-
-
-	# Find out the number of buttons used, default is all.
-	buttonCount = 8
-	try:
-		controls = ET.parse(sys.argv[1])
-		root = controls.getroot()
-		path = ".//Game/[@RomName='%s']/Player/[@Number='1']" % sys.argv[3]
-		player = root.findall(path)
-		buttonCount = player[0].get("NumButtons")
-	except:
-		print("ROM [%s] not found in [%s]" % (sys.argv[3], sys.argv[1]))
-
-	# Find the number of simultaneous players
-	simplayers = 2
-	try:
-		nplayers = ConfigParser(strict=False)
-		nplayers.read(sys.argv[2])
-		players = nplayers.get("NPlayers", sys.argv[3])
-		if players == "2P alt" or players == "1P":
-			simplayers = 1
-		elif "sim" in players:
-			simplayers = 2
-	except:
-		print ("ROM [%s] not found in [%s]" % (sys.argv[3], sys.argv[2]))
-
-	print("Button Count: %s " % buttonCount)
-	print("Simultaneous Players: %s " % simplayers)
-
-	# Fire up the LEDs
-	# - i2cset -y 1 0x20 0x00 0x00  ← bank 0 OUTPUT
-	# - i2cset -y 1 0x20 0x01 0x00 ← bank 1 OUTPUT
-	# - i2cset -y 1 0x20 0x12 0xff ← Turn on all bank 0 outputs
-	# - i2cset -y 1 0x20 0x13 0xff ← Turn on all bank 1 outputs
-
-	address = 0x20
-	bus = smbus.SMBus(1)
-	bus.write_i2c_block_data(address, 0x00, [0x00])
-	bus.write_i2c_block_data(address, 0x01, [0x00])
-
-	# Player 1
-	leds = 0xff ^ (0xff << int(buttonCount))
-	bus.write_i2c_block_data(address, 0x13, [leds])
-
-	# Player 2
-	if simplayers == 1:
-		leds = 0x00
-	bus.write_i2c_block_data(address, 0x12, [leds])
-
 
 
 '''
-return a list of active buttons for the provided emulator&rom. return None if nothing was found.  
-{ numPlayers: 2,  alternating: False,  buttons: {P1_BUTTON1:True, P1_BUTTON2:True, P2_BUTTON1:True, P2_BUTTON2:True} }
+Read the emulators XML file and return a list of active buttons for the 
+provided emulator&rom. return None if nothing was found.  
+[P1_BUTTON1, P1_BUTTON2, P2_BUTTON1, P2_BUTTON2]
 '''
 def getButtonList(emulator, rom):
 	buttonList = []
@@ -170,7 +114,12 @@ def getButtonList(emulator, rom):
 
 
 '''
-generate a pin mask for the given emulator and button name list
+generate a pin mask for the given emulator and button name list.
+The config.ini file is referenced and the pins are mapped first 
+by looking for the emulator named section, then cross-referencing
+those names with those in the [pins] section.  Using those pins
+numbers, generate a 4 byte pin map corrisponding to what the 
+MCP23017 will expect for each of it's 2 banks of pins. 
 '''
 def getPinMask(emulatorName, buttonNameList):
 	logging.info("Generating i2c LED pin mask for...\n  emulator:[%s]\n  buttons:%s" % (emulatorName, buttonNameList))
@@ -193,12 +142,12 @@ def getPinMask(emulatorName, buttonNameList):
 '''
 Send the provided 4 byte pin mask to the MCP27017 i2c chip.  the boolean printOnly will perform
 shifting and calculations to generate the output bytes, but will refrain from actually connecting 
-to, and sending the bytes to the i2c chip.  This is usefull mostly just for debugging.
+to, and sending the bytes to the i2c chip.  This is usefull mostly just for debugging locally.
 '''
 def sendPinMask(pinMask, printOnly):
 	
 	bank0 = pinMask & 0xff
-	bank1 = (pinMask >> 9) & 0xff
+	bank1 = (pinMask >> 8) & 0xff
 	logging.info("Sending PinMask:[0x%x] -> bank1:[0x%x] bank0:[0x%x] to I2C address [0x%x]" % (pinMask, bank1, bank0, _I2C_ADDRESS))
 	
 	if printOnly == True:
@@ -240,6 +189,7 @@ def getButtonPin(emulatorName, buttonName):
 
 '''
 Load the config.ini into the module variables and do some basic checking.
+Also, the special "TEST" emulator section is dynamically created.
 '''
 def loadConfig():
 	global _basePath
@@ -271,16 +221,21 @@ def main():
 	global _basePath
 	global _config
 	
+	# Find the path to this script file, to find all necessary data files.
 	_basePath = args.configdir
 			
+	# Alter the desired verbosity of the output logging
 	if args.quiet == False:
 		logging.basicConfig(level=logging.DEBUG)
 	else:
 		logging.basicConfig(level=logging.INFO)
 	
+	# Load the confg file into memory
 	loadConfig()
 	
-	# Special Case emulator "button" bypasses the xml lookup, and directly sets the button by name 
+	# TODO: To compensate for the slow(ish) load times of Mame, lets' fire up a background thread that animates the buttons
+	
+	# Special Case emulator "TEST" bypasses the xml lookup, and directly sets the button by name 
 	if args.emulator == _TEST_SECTION:
 		mask = getPinMask(args.emulator, [args.rom])
 		sendPinMask(mask, args.printonly)
@@ -288,7 +243,7 @@ def main():
 	else:
 		blist = getButtonList(args.emulator, args.rom)
 	
-	# If no buttons were found, lets' generate one from the config.ini
+	# If no buttons were found, lets' generate one from the config.ini.  Simply turn on all known buttons.
 	enableFlashIndicator = False
 	if blist == None:
 		enableFlashIndicator = True
@@ -297,6 +252,7 @@ def main():
 		for btn in _config.items(args.emulator):
 			blist.append(btn[0])
 		
+	# Generate a pin mask for the desired buttons 
 	pinMask = getPinMask(args.emulator, blist)
 	
 	# Flash the buttons to tell the user a default was used
@@ -306,7 +262,15 @@ def main():
 			time.sleep(_I2C_FLASH_INTERVAL)
 			sendPinMask(_I2C_ALL_OFF_PINMASK, args.printonly)
 			time.sleep(_I2C_FLASH_INTERVAL)
+	else:
+		# Quick-Flash the buttons to indicate a success
+		for index in range(0, 2):
+			sendPinMask(pinMask, args.printonly)
+			time.sleep(_I2C_FLASH_INTERVAL/2)
+			sendPinMask(_I2C_ALL_OFF_PINMASK, args.printonly)
+			time.sleep(_I2C_FLASH_INTERVAL/2)
 	
+	# Fire up the buttons!!
 	sendPinMask(pinMask, args.printonly)
 	
 	
@@ -314,3 +278,7 @@ def main():
 if __name__ == "__main__":
 	main()
 	
+
+
+
+
