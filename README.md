@@ -34,7 +34,7 @@ This circuit board, combined with this software, and a "Zero Delay LED" usb enco
 These instructions are currently tailored for a RetroPie install, adjustments might be necessary if you are using this software on a non RetroPie based system.
 
 # Build the Circuit Board
-I have a simple [circuit and PCB design]()https://easyeda.com/shaneapowell/RetroPieLightController-UxFXfxPJ1 on EasyEDA called `RetroPieLightController`.  Don't be put off by having to build a circuit board. It's much easier than you might think.  I use the [Laser-Jet Printer PCB masking](http://www.instructables.com/id/PCB-etching-using-laser-printer/) method, and the [Hydrogen Peroxide + Muratic Acide based etchant](http://www.instructables.com/id/Stop-using-Ferric-Chloride-etchant!--A-better-etc/?ALLSTEPS). It's worked well enough for me to create quite a few home-made PCBs.  2 tips... use a Sharpie to fill in any spots on the copper where the printer ink didn't transfer, and don't be afraid to use plenty of heat and time on the Iron when transfering the ink.
+I have a simple [circuit and PCB design](https://easyeda.com/shaneapowell/RetroPieLightController-UxFXfxPJ10) on [EasyEDA](https://easyeda.com) called `RetroPieLightController`.  Don't be put off by having to build a circuit board. It's much easier than you might think.  I use the [Laser-Jet Printer PCB masking](http://www.instructables.com/id/PCB-etching-using-laser-printer/) method, and the [Hydrogen Peroxide + Muratic Acide based etchant](http://www.instructables.com/id/Stop-using-Ferric-Chloride-etchant!--A-better-etc/?ALLSTEPS). It's worked well enough for me to create quite a few home-made PCBs.  2 tips... use a Sharpie to fill in any spots on the copper where the printer ink didn't transfer, and don't be afraid to use plenty of heat and time on the Iron when transfering the ink.
 
 ![schematic](https://easyeda.com/normal/Schematic-HeqomkhRP.png)
 
@@ -44,19 +44,20 @@ https://easyeda.com/normal/Schematic-HeqomkhRP.png
 
 https://easyeda.com/normal/PCB-BVv52CAaK.png
 
-[Printer Friendly BOTTOM LAYER PDF of the above PCB. in the source code 'docs' folder)[https://github.com/shaneapowell/ArcadeIlluminate/raw/master/docs/led-control.pdf]
+###Here is a PDF copy of the laser-printer mask I used to create my circuit board.###
+[Printer Friendly BOTTOM LAYER PDF of the above PCB. in the source code 'docs' folder](https://github.com/shaneapowell/ArcadeIlluminate/raw/master/docs/led-control.pdf)
 
-I'm not going to explain in detail how to build the PCB... hopefully after reading the Instructables I linked to above, you'll be well on your way to doing your own PCBs in no time.
+I'm not going to explain in detail how to build the PCB... hopefully after reading the Instructables I linked to above, you'll be well on your way to doing your own PCBs in no time (4+ minutes).
 
 ## Parts Needed
 Note.. I got all my parts in larger quantities from eBay since I use them for many other side-projects.  But, I'll provide some ADAFruit links for convenience. I've bought stuff from them before and had great success.
-- 1 [MCP23017](https://www.adafruit.com/products/732)http://www.amazon.com/MCP23017-input-output-port-expander/dp/B00I6OEWJM/ IC in a DIP package.
-- 2 [UNL2803](https://www.adafruit.com/product/970) ICs in a DIP package.
+- 1 x [MCP23017](https://www.adafruit.com/products/732) IC in a DIP package.
+- 2 x [UNL2803](https://www.adafruit.com/product/970) ICs in a DIP package.
 - Some [Male pin headers](https://www.adafruit.com/products/2671) 20 to be exact, but a few extra won't hurt.
 - Single Side [Copper PCB board](http://www.amazon.com/uxcell-Rectangle-Laminate-Printed-130x250mm/dp/B00N3WU91C/)
 - Hydrogen Peroxide.  The standard stuff you can buy at any pharmacy.
 - [Muratic Acid](http://www.lowes.com/pd_206474-34228-CR.MA.P.01_1z0weh7__?productId=3024039&pl=1) This is the same stuff you can buy at Lowes or HomeDepot for cleaning pools.  Find a friend who owns a pool, they might have some. You will only need about 1 oz anyway.
-- 2 1.8Kohm resistors.  Truth be told, 1.8K resistors seems to be what the Raspberry Pi recommends for pullups. I used a pair of 1.5K resistors on mine.  I had tested with a pair of 4.7K resistors on my breadboard with success.  I see no reason why you couldn't use the standard 4.7K, or anywhere in between.
+- 2 x 1.8Kohm resistors.  Truth be told, 1.8K resistors seems to be what the Raspberry Pi recommends for pullups. I used a pair of 1.5K resistors on mine.  I had tested with a pair of 4.7K resistors on my breadboard with success.  I see no reason why you couldn't use the standard 4.7K, or anywhere in between.
 
 ## Tools Needed
 - Soldering Iron
