@@ -139,5 +139,21 @@ B16=12
 ```
 5 Go back and re-run step #2. Your buttons should now light up in the correct order. If not, keep doing Steps 2-4 until it's correct.
 
+# TROUBLESHOOTING
+Check the output of illuminate.py when manually running it at the command prompt.  The logfile `/tmp/illuminate.log` is also a good place to start.  If need be, add the `-d` option to add more debugging output.  
+
+# FAQ
+**Q Why do the lights flash slowly 4 times?**
+
+A This indicates that an error occured trying to find the correct buttons to light up. 4 show flashes means that some sort of "default" button configuration was used.  Check the logfile to see what errors caused this.
+
+---
+
+**Q Why do the lights flash quickly 2 times?**
+
+A This indicates a success!  It's quicly telling you that the buttons that are lit up are correct.  It means a mapping was found in one of the .xml files, and in the config.ini file.
+
+---
+
 #RESOURCES:
 - http://forum.arcadecontrols.com/index.php/topic,98241.0.html
