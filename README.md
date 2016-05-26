@@ -58,6 +58,10 @@ Note.. I got all my parts in larger quantities from eBay since I use them for ma
 - Hydrogen Peroxide.  The standard stuff you can buy at any pharmacy.
 - [Muratic Acid](http://www.lowes.com/pd_206474-34228-CR.MA.P.01_1z0weh7__?productId=3024039&pl=1) This is the same stuff you can buy at Lowes or HomeDepot for cleaning pools.  Find a friend who owns a pool, they might have some. You will only need about 1 oz anyway.
 - 2 x 1.8Kohm resistors.  Truth be told, 1.8K resistors seems to be what the Raspberry Pi recommends for pullups. I used a pair of 1.5K resistors on mine.  I had tested with a pair of 4.7K resistors on my breadboard with success.  I see no reason why you couldn't use the standard 4.7K, or anywhere in between.
+- 4-pin jumper wire (long) *  components.
+- 2 x 8-pin jumper wire (long) *
+
+> * The length needed will depend on the distance between your components in your cabinet.  I had to extend my 4-pin power & data wires, but the LED wires were just long enough.  Just!!  A couple of [50cm 2.54mm F/F 2 Pin Solderless Colored Breadboard Jumper Wire 5 Pcs](http://www.amazon.com/2-54mm-Solderless-Colored-Breadboard-Jumper/dp/B00O9YB430/) should work.
 
 ## Tools Needed
 - Soldering Iron
