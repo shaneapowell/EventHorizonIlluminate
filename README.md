@@ -20,19 +20,54 @@
 >OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 >SOFTWARE.
 
-
-
 # INCOMPLETE.. Please check back soon!! #
 This project is a work in progress with very active development.  Please be patient and check back soon for a complete and useable tool.
+
+# Arcade Illuminate
+A super-simple circuit board and python script that can control arcade cabinet button LEDs.  It's running on my system with 5v LEDs, but should have no problem running almost any voltage, and up to about an amp of current.  If you have the skills to build your own RetroPie cabinet.. odds are you have the skills to build one of these circuit boards.
+
+How it works?  The circuit board is designed to be wired to the `ground`, or negative side of the LEDs.  The switching of the current is done by allowing the voltage to flow `into` the board from the LED, not sending voltage `out` to the LEDs.  The advantage of this is that you should be free to use almost any voltage on your LEDs as you want.  It also means you don't need to rely on your Raspberry Pi to provide the 5v of power to your LEDs.  The buttons I have, happen to be 5v LEDs.  This circuit board should have no trouble at all handling 12v LEDs.
+
+This circuit board, combined with this software, and a "Zero Delay LED" usb encoder board is currently working PERFECTLY on my DIY 2-Player Arcade Cabinet.
 
 # Note:
 These instructions are currently tailored for a RetroPie install, adjustments might be necessary if you are using this software on a non RetroPie based system.
 
 # Build the Circuit Board
-TBA
+I have a simple [circuit and PCB design]()https://easyeda.com/shaneapowell/RetroPieLightController-UxFXfxPJ1 on EasyEDA called `RetroPieLightController`.  Don't be put off by having to build a circuit board. It's much easier than you might think.  I use the [Laser-Jet Printer PCB masking](http://www.instructables.com/id/PCB-etching-using-laser-printer/) method, and the [Hydrogen Peroxide + Muratic Acide based etchant](http://www.instructables.com/id/Stop-using-Ferric-Chloride-etchant!--A-better-etc/?ALLSTEPS). It's worked well enough for me to create quite a few home-made PCBs.  2 tips... use a Sharpie to fill in any spots on the copper where the printer ink didn't transfer, and don't be afraid to use plenty of heat and time on the Iron when transfering the ink.
+
+![schematic](https://easyeda.com/normal/Schematic-HeqomkhRP.png)
+
+https://easyeda.com/normal/Schematic-HeqomkhRP.png
+
+![PCB](https://easyeda.com/normal/PCB-BVv52CAaK.png)
+
+https://easyeda.com/normal/PCB-BVv52CAaK.png
+
+[Printer Friendly BOTTOM LAYER PDF of the above PCB. in the source code 'docs' folder)[https://github.com/shaneapowell/ArcadeIlluminate/raw/master/docs/led-control.pdf]
+
+I'm not going to explain in detail how to build the PCB... hopefully after reading the Instructables I linked to above, you'll be well on your way to doing your own PCBs in no time.
+
+## Parts Needed
+Note.. I got all my parts in larger quantities from eBay since I use them for many other side-projects.  But, I'll provide some ADAFruit links for convenience. I've bought stuff from them before and had great success.
+- 1 [MCP23017](https://www.adafruit.com/products/732)http://www.amazon.com/MCP23017-input-output-port-expander/dp/B00I6OEWJM/ IC in a DIP package.
+- 2 [UNL2803](https://www.adafruit.com/product/970) ICs in a DIP package.
+- Some [Male pin headers](https://www.adafruit.com/products/2671) 20 to be exact, but a few extra won't hurt.
+- Single Side [Copper PCB board](http://www.amazon.com/uxcell-Rectangle-Laminate-Printed-130x250mm/dp/B00N3WU91C/)
+- Hydrogen Peroxide.  The standard stuff you can buy at any pharmacy.
+- [Muratic Acid](http://www.lowes.com/pd_206474-34228-CR.MA.P.01_1z0weh7__?productId=3024039&pl=1) This is the same stuff you can buy at Lowes or HomeDepot for cleaning pools.  Find a friend who owns a pool, they might have some. You will only need about 1 oz anyway.
+- 2 1.8Kohm resistors.  Truth be told, 1.8K resistors seems to be what the Raspberry Pi recommends for pullups. I used a pair of 1.5K resistors on mine.  I had tested with a pair of 4.7K resistors on my breadboard with success.  I see no reason why you couldn't use the standard 4.7K, or anywhere in between.
+
+## Tools Needed
+- Soldering Iron
+- Solder
+- [1/32 & 3/64 drill bits](http://www.lowes.com/pd_179434-353-628-02___?productId=1207193).
+- I needed an adjustable [dremmel chuck](http://www.lowes.com/pd_107391-353-4486-03_0__?productId=1212175&Ntt=) to hold the drill bits.
 
 # Wire the LEDs to the Circuit Board
-TBA
+TBA - I'll include photos and diagrams of exactly how mine is wired, and what parts I used. 
+
+Worth noting now, I used a joystick-button kit from Amazon that included a "Zero Delay" encoder with built-in LED power pins.  I'll explain here how I tweaked the wires to work with this software.
 
 # INSTALL:
 1 Ensure you have Python3 installed.  try typing "python --version" or "python3 --version" at a command prompt.   Retropie comes with python3 already installed.
@@ -148,12 +183,23 @@ Check the output of illuminate.py when manually running it at the command prompt
 A This indicates that an error occured trying to find the correct buttons to light up. 4 show flashes means that some sort of "default" button configuration was used.  Check the logfile to see what errors caused this.
 
 ---
-
 **Q Why do the lights flash quickly 2 times?**
 
 A This indicates a success!  It's quicly telling you that the buttons that are lit up are correct.  It means a mapping was found in one of the .xml files, and in the config.ini file.
 
 ---
+***Q Can I help with this project?***
+
+A Yes!!  See `CONTRIBUTE` below.
+---
+
+#CONTRIBUTE
+I'm acceping pull-requests for any modifications to the button definition XML files.  I'll push any changes I make, and I encourage anybody to help me by pushing any changes they make too.
+
+Also.. I'm not a circuit expert.. I'm a hobbyist.  If any electronics experts out there can improve on my design.. please do.. I'll happily link to your designs here.
+
+# FUTURE PLANS
+GPIO? Not everybody wants to bother with adding a MCP23107 chip for i2c support.  That said.. some of you will not event want to use the UNL2803 chip to sink the current.. someone will have very low current LEDs wired in, and want to sink, or source the current directly to the LEDs using the Raspberry Pis GPIO pins.  While, I don't think that is a good idea, I'm considering adding direct GPIO control in a future release.  Should be somewhat simple to add afterall.
 
 #RESOURCES:
 - http://forum.arcadecontrols.com/index.php/topic,98241.0.html
