@@ -32,14 +32,14 @@ This circuit board, combined with this software, and a "Zero Delay LED" usb enco
 
 ![My Cabinet](https://raw.githubusercontent.com/shaneapowell/ArcadeIlluminate/master/docs/cabinet-01.jpg)
 
-## See it in action on YouTube
+## See it in action on [YouTube](https://www.youtube.com/watch?v=_jkyXNKug2k)
 [![See it in Action](https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/Youtube_icon.svg/256px-Youtube_icon.svg.png)](https://www.youtube.com/watch?v=_jkyXNKug2k)
 
 # Note:
 These instructions are currently tailored for a RetroPie install, adjustments might be necessary if you are using this software on a non RetroPie based system.
 
 # Build the Circuit Board
-I have a simple [circuit and PCB design](https://easyeda.com/shaneapowell/RetroPieLightController-UxFXfxPJ10) on [EasyEDA](https://easyeda.com) called `RetroPieLightController`.  Don't be put off by having to build a circuit board. It's much easier than you might think.  I use the [Laser-Jet Printer PCB masking](http://www.instructables.com/id/PCB-etching-using-laser-printer/) method, and the [Hydrogen Peroxide + Muratic Acide based etchant](http://www.instructables.com/id/Stop-using-Ferric-Chloride-etchant!--A-better-etc/?ALLSTEPS). It's worked well enough for me to create quite a few home-made PCBs.  2 tips... use a Sharpie to fill in any spots on the copper where the printer ink didn't transfer, and don't be afraid to use plenty of heat and time on the Iron when transfering the ink.
+I have a simple [circuit and PCB design](https://easyeda.com/shaneapowell/RetroPieLightController-UxFXfxPJ1) on [EasyEDA](https://easyeda.com) called `RetroPieLightController`.  Don't be put off by having to build a circuit board. It's much easier than you might think.  I use the [Laser-Jet Printer PCB masking](http://www.instructables.com/id/PCB-etching-using-laser-printer/) method, and the [Hydrogen Peroxide + Muratic Acide based etchant](http://www.instructables.com/id/Stop-using-Ferric-Chloride-etchant!--A-better-etc/?ALLSTEPS). It's worked well enough for me to create quite a few home-made PCBs.  2 tips... use a Sharpie to fill in any spots on the copper where the printer ink didn't transfer, and don't be afraid to use plenty of heat and time on the Iron when transfering the ink.
 
 If you really don't want to get into etching your own circuit board, I'm sure this schematic would be easy to transfer to one of those [read-made coper perf-boards](https://www.adafruit.com/products/2670) too.  If someone comes up with a clean perf-board layout, please send me the design and I'll put it here.
 
