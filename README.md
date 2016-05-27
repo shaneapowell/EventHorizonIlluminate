@@ -82,15 +82,22 @@ TBA - I'll include photos and diagrams of exactly how mine is wired, and what pa
 
 >insert completed wiring image here*
 
-Worth noting now, I used a joystick-button kit from Amazon that included a "Zero Delay" encoder with built-in LED power pins.  I'll explain here how I tweaked the wires to work with this software.
+Worth noting, I used a joystick-button kit from Amazon that included a "Zero Delay LED" encoder with built-in 5v LED power pins.  I'll explain here how I tweaked the wires to work with this software.
 
-# INSTALL:
+
+# Wire the Circuit Board to the Raspberrry Pi
+TBA - I'll include photos an diagrams how to connect it here.
+>insert completed wiring image here*
+
+# Software Install:
+(I'm going to assume some basic linux command line skills here)
+
 1 Ensure you have Python3 installed.  try typing "python --version" or "python3 --version" at a command prompt.   Retropie comes with python3 already installed.
 
 2 Install the i2c Python library 
   `sudo apt-get install python3-smbus` 
 
-3 Download the `illuminate.py`, `config.ini` and each `.xml` file into their own folder. eg `/home/pi/illuminate`.  The easiest way to get all the files here is to just clone the repo.
+3 Download the `illuminate.py`, `config.ini` and each `.xml` file into their own folder. eg `/home/pi/illuminate`.  The easiest way to get all the files here is to just clone the repo.  Given that I intend to try and keep the xml definition files as up to date as I can.. this might be good for auto-updating your own instalation. 
 > cd /home/pi; git clone https://github.com/shaneapowell/ArcadeIlluminate.git illuminate
 
 4 Edit the shell script `runcommand.sh` located in `/opt/retropie/supplementary/runcommand`.  Find the section near the bottom that contains the following section of text:
@@ -130,7 +137,7 @@ fi
 ```	
     
 # SETUP / CONFIGURE
-1 First, modify the `config.ini` file [pins] section to be a nicely ordered list.  I keep pushing my crazy pin order to the repo.. sorry about that. 
+1 First, create a new file named `config.ini`. Add a [pins] section to map the button names to your LED pins.  It should look like this.
 ```
 [pins]
 B1=0
@@ -208,6 +215,14 @@ A This indicates a success!  It's quicly telling you that the buttons that are l
 
 A Yes!!  See `CONTRIBUTE` below.
 ---
+***Q How can I add button definitions for a system?
+
+A button definitions are defined in the `systems.ini` file.  Each emulation system has it's own section defined.  Simply add the section for the system that is missing, map the system specific button name to the button name in `config.ini`.  Now, at a minimum, the default buttons should light up when you launch that emulator.
+
+---
+*** Q How can I control game specific buttons?
+A TBA.. (modify the <system name>.xml file)
+
 
 #CONTRIBUTE
 I'm acceping pull-requests for any modifications to the button definition XML files.  I'll push any changes I make, and I encourage anybody to help me by pushing any changes they make too.
