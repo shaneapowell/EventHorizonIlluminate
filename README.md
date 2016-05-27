@@ -82,7 +82,8 @@ Worth noting now, I used a joystick-button kit from Amazon that included a "Zero
 2 Install the i2c Python library 
   `sudo apt-get install python3-smbus` 
 
-3 Download the `illuminate.py`, `config.ini` and each `.xml` file into their own folder. eg `/home/pi/illuminate`.
+3 Download the `illuminate.py`, `config.ini` and each `.xml` file into their own folder. eg `/home/pi/illuminate`.  The easiest way to get all the files here is to just clone the repo.
+> cd /home/pi; git clone https://github.com/shaneapowell/ArcadeIlluminate.git illuminate
 
 4 Edit the shell script `runcommand.sh` located in `/opt/retropie/supplementary/runcommand`.  Find the section near the bottom that contains the following section of text:
 ```
