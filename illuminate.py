@@ -93,7 +93,7 @@ def getButtonList(emulator, rom):
 			
 			labels = player.findall(".//Label")
 			
-			logging.debug("Mapping player[%d] buttons" % (playerIndex+1))
+			logging.debug("Mapping [%d] player[%d] buttons" % (len(labels), playerIndex+1))
 			
 			if remapPlayer1:
 				p1Prefix = _REMAP_Pn_PREFIX_FORMAT % (1)
@@ -106,6 +106,8 @@ def getButtonList(emulator, rom):
 				if remapPlayer1:
 					name = name.replace(p1Prefix, remapPrefix, 1)
 				buttonList.append(name)
+		
+			logging.debug("Found Buttons %s" % buttonList)
 		
 	except Exception as e:
 		buttonList = None
@@ -228,7 +230,6 @@ def main():
 	systemName = args.system
 	romName = args.rom
 	
-	logging.info("System:[%s] ROM:[%s]")
 	
 	# Find the path to this script file, to find all necessary data files.
 	_basePath = args.configdir
@@ -238,6 +239,8 @@ def main():
 		logging.basicConfig(level=logging.DEBUG)
 	else:
 		logging.basicConfig(level=logging.INFO)
+	
+	logging.info("System:[%s] ROM:[%s]")
 	
 	# Load the confg file into memory
 	loadConfig()

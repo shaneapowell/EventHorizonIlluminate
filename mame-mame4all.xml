@@ -13854,7 +13854,7 @@
       </Labels>
     </Player>
   </Game>
-  <Game RomName="strider" GameName="Strider (US set 1)" NumPlayers="2" Alternating="0" Mirrored="1" UsesService="0" Tilt="0" Cocktail="1">
+  <Game RomName="strider" GameName="Strider (US set 1)" NumPlayers="2" Alternating="1" Mirrored="1" UsesService="0" Tilt="0" Cocktail="1">
     <Status Verified="1" />
     <MiscDetails />
     <Player Number="1" NumButtons="2">
