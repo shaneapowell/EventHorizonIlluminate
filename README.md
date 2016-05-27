@@ -30,6 +30,10 @@ How it works?  The circuit board is designed to be wired to the `ground`, or neg
 
 This circuit board, combined with this software, and a "Zero Delay LED" usb encoder board is currently working PERFECTLY on my DIY 2-Player Arcade Cabinet.
 
+>insert image (animated gif?) of completed cabinet
+
+>insert youtube video here*
+
 # Note:
 These instructions are currently tailored for a RetroPie install, adjustments might be necessary if you are using this software on a non RetroPie based system.
 
@@ -50,6 +54,8 @@ https://easyeda.com/normal/PCB-BVv52CAaK.png
 [Printer Friendly BOTTOM LAYER PDF of the above PCB. in the source code 'docs' folder](https://github.com/shaneapowell/ArcadeIlluminate/raw/master/docs/led-control.pdf)
 
 I'm not going to explain in detail how to build the PCB... hopefully after reading the Instructables I linked to above, you'll be well on your way to doing your own PCBs in no time (4+ minutes).
+
+>insert image of completed PCB here*
 
 ## Parts Needed
 Note.. I got all my parts in larger quantities from eBay since I use them for many other side-projects.  But, I'll provide some ADAFruit links for convenience. I've bought stuff from them before and had great success.
@@ -73,6 +79,8 @@ Note.. I got all my parts in larger quantities from eBay since I use them for ma
 
 # Wire the LEDs to the Circuit Board
 TBA - I'll include photos and diagrams of exactly how mine is wired, and what parts I used. 
+
+>insert completed wiring image here*
 
 Worth noting now, I used a joystick-button kit from Amazon that included a "Zero Delay" encoder with built-in LED power pins.  I'll explain here how I tweaked the wires to work with this software.
 
