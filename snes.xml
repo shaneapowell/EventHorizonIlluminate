@@ -23,4 +23,23 @@
       </Labels>
     </Player>
   </Game>
-  </Dat>
+  <Game RomName="Earthworm Jim (USA)" NumPlayers="1" Alternating="0">
+    <Player>
+      <Labels>
+        <Label Name="P1_A"  Value="Whip"/>
+        <Label Name="P1_B"  Value="Jump"/>
+        <Label Name="P1_Y"  Value="Shoot"/>
+      </Labels>
+    </Player>
+  </Game>
+  <Game RomName="Earthworm Jim 2 (USA)" NumPlayers="1" Alternating="0">
+    <Player>
+      <Labels>
+        <Label Name="P1_A"  Value="Whip"/>
+        <Label Name="P1_B"  Value="Jump"/>
+        <Label Name="P1_X"  Value="Scroll"/>
+        <Label Name="P1_Y"  Value="Shoot"/>
+      </Labels>
+    </Player>
+  </Game>
+</Dat>

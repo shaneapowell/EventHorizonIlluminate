@@ -35,6 +35,7 @@ import logging
 _SETTINGS_SECTION="settings"
 _TEST_SECTION="TEST"
 _PINS_SECTION="pins"
+_SYSTEMS_FILE="systems.ini"
 _CONFIG_FILE="config.ini"
 _REMAP_Pn_PREFIX_FORMAT="P%d_"
 _I2C_ADDRESS = 0x20
@@ -200,10 +201,12 @@ Also, the special "TEST" emulator section is dynamically created.
 def loadConfig():
 	global _basePath
 	global _config
-	filename = "%s/%s" % (_basePath, _CONFIG_FILE)
-	logging.debug("Loading Config %s" % filename)
+	systemsFilename = "%s/%s" % (_basePath, _CONFIG_FILE)
+	configFilename = "%s/%s" % (_basePath, _SYSTEMS_FILE)
+	logging.debug("Loading Configs [%s] & [%s]" % (configFilename, systemsFilename))
 	_config = ConfigParser()
-	_config.read(filename)
+	_config.read(systemsFilename)
+	_config.read(configFilename)
 	
 	# Add our special TEST section
 	_config.add_section(_TEST_SECTION)
