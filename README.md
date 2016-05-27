@@ -30,9 +30,10 @@ How it works?  The circuit board is designed to be wired to the `ground`, or neg
 
 This circuit board, combined with this software, and a "Zero Delay LED" usb encoder board is currently working PERFECTLY on my DIY 2-Player Arcade Cabinet.
 
->insert image (animated gif?) of completed cabinet
+![My Cabinet](https://raw.githubusercontent.com/shaneapowell/ArcadeIlluminate/master/docs/cabinet-01.jpg)
 
->insert youtube video here*
+## See it in action on YouTube
+[![See it in Action](https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/Youtube_icon.svg/256px-Youtube_icon.svg.png)](https://www.youtube.com/watch?v=_jkyXNKug2k)
 
 # Note:
 These instructions are currently tailored for a RetroPie install, adjustments might be necessary if you are using this software on a non RetroPie based system.
