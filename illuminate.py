@@ -62,7 +62,7 @@ def getButtonList(mapfile, system, rom):
 	elif mapfile.endswith(".ini"):
 		return getINIButtonList(mapfile, system, rom)
 	else:
-		logging.warning("No mapfile provided/found for system:[%s], no buttons mapped")
+		logging.warning("No mapfile provided/found for system:[%s], no buttons mapped" % (system))
 		return None
 
 
@@ -143,13 +143,15 @@ def getINIButtonList(mapfile, system, rom):
 		systemConfigFile = "%s/%s" % (_basePath, mapfile)
 		cfg = ConfigParser()
 		cfg.read(systemConfigFile)
+		print(str(cfg.sections()))
 		
 		if cfg.has_section(rom) == False:
 			logging.warning("ROM:[%s] section not found in [%s]" %(rom, systemConfigFile))
 			return None
 			
 		numPlayers = cfg.getint(rom, "numplayers")
-		simultaneous = False == cfg.getboolean(rom, "alternating")
+		simultaneous = True == cfg.getboolean(rom, "alternating")
+		print(simultaneous)
 		
 		for playerIndex in range(0, numPlayers if simultaneous else 1):
 			remapPlayer1 = False
