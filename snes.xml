@@ -42,4 +42,13 @@
       </Labels>
     </Player>
   </Game>
+  <Game RomName="Donkey Kong Country (USA) (Rev B)" NumPlayers="2" Alternating="0">
+    <Player>
+      <Labels>
+        <Label Name="P1_A"  Value="Whip"/>
+        <Label Name="P1_B"  Value="Jump"/>
+        <Label Name="P1_Y"  Value="Shoot"/>
+      </Labels>
+    </Player>
+  </Game>
 </Dat>
