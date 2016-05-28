@@ -212,17 +212,17 @@ A: This indicates that an error occured trying to find the correct buttons to li
 A: This indicates a success!  It's quicly telling you that the buttons that are lit up are correct.  It means a mapping was found in one of the .xml files, and in the config.ini file.
 
 ---
-**Q: Can I help with this project?
+**Q: Can I help with this project?**
 
 A: Yes!!  See `CONTRIBUTE` below.
 
 ---
-**Q: How can I add button definitions for a system?
+**Q: How can I add button definitions for a system?**
 
 A button definitions are defined in the `systems.ini` file.  Each emulation system has it's own section defined.  Simply add the section for the system that is missing, map the system specific button name to the button name in `config.ini`.  Now, at a minimum, the default buttons should light up when you launch that emulator.
 
 ---
-** Q How can I control game specific buttons?
+** Q How can I control game specific buttons?**
 
 A: TBA.. (modify the <system name>.xml file)
 
