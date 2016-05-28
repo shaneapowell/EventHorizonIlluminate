@@ -226,6 +226,10 @@ A: Button definitions are defined in the `systems.ini` file.  Each emulation sys
 
 A: TBA.. (modify the <system name>.xml file)
 
+---
+***Q: What is up with the bloated confusing XML format for the game button mappings?***
+
+A: Sorry about that... but.. since I had somewhere around 3500 MAME games to map, I wasn't about to try and manually map each game myself.  So, using the Controls.xml file from [!src](http://forum.arcadecontrols.com/index.php/topic,98241.0.html) I opted to continue using the same source format. That said.. I hate the XML format, so I'm already working on switching to a .ini format for the game mappings.
 
 #CONTRIBUTE
 I'm acceping pull-requests for any modifications to the button definition XML files.  I'll push any changes I make, and I encourage anybody to help me by pushing any changes they make too.
