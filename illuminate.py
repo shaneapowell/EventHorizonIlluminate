@@ -53,18 +53,32 @@ _config=None
 
 
 '''
+Depending on the extension of the mapfile, load the 
+correct button list for the desired system & rom
+'''
+def getButtonList(mapfile, system, rom):
+	if mapfile.endswith(".xml"):
+		return getXMLButtonList(mapfile, system, rom)
+	elif mapfile.endswith(".ini"):
+		return getINIButtonList(mapfile, system, rom)
+	else:
+		logging.warning("No mapfile provided/found for system:[%s], no buttons mapped")
+		return None
+
+
+'''
 Read the emulators XML file and return a list of active buttons for the 
 provided emulator&rom. return None if nothing was found.  
 [P1_BUTTON1, P1_BUTTON2, P2_BUTTON1, P2_BUTTON2]
 '''
-def getButtonList(emulator, rom):
+def getXMLButtonList(mapfile, emulator, rom):
 	buttonList = []
 	
 	try:
-		emulatorConfigFile = "%s/%s.xml" % (_basePath, emulator)
-		logging.info("Reading control info from config file:[%s] for rom:[%s]" % (emulatorConfigFile, rom))
+		systemConfigFile = "%s/%s" % (_basePath, mapfile)
+		logging.info("Reading control info from config file:[%s] for rom:[%s]" % (systemConfigFile, rom))
 		
-		controls = ET.parse(emulatorConfigFile)
+		controls = ET.parse(systemConfigFile)
 		root = controls.getroot()
 		game = root.findall(".//Game/[@RomName='%s']" % (rom))
 		
@@ -112,13 +126,47 @@ def getButtonList(emulator, rom):
 		
 	except Exception as e:
 		buttonList = None
-		logging.exception("Error Loading Button Data for [%s][%s] not found in [%s]" % (emulator, rom, emulatorConfigFile))
+		logging.exception("Error Loading Button Data for [%s][%s] not found in [%s]" % (emulator, rom, systemConfigFile))
 		
 	return buttonList
 	#return {"numPlayers":len(players), "alternating":alternating == 1, "buttons": buttons}
 
 
-
+'''
+Read the button list from a .ini file for the given system&rom.
+'''
+def getINIButtonList(mapfile, system, rom):
+	
+	buttonList = []
+	
+	try:
+		systemConfigFile = "%s/%s" % (_basePath, mapfile)
+		cfg = ConfigParser()
+		cfg.read(systemConfigFile)
+		
+		if cfg.has_section(rom) == False:
+			logging.warning("ROM:[%s] section not found in [%s]" %(rom, systemConfigFile))
+			return None
+			
+		numPlayers = cfg.getint(rom, "numplayers")
+		simultaneous = False == cfg.getboolean(rom, "alternating")
+		
+		for playerIndex in range(0, numPlayers if simultaneous else 1):
+			remapPlayer1 = False
+			csvName = "player%d" % (playerIndex+1)
+			if cfg.has_option(rom, csvName) == False:
+				logging.warning("Player:[%s] option not found in rom section:[%s] defaulting to player1 mapping" %(csvName, rom))
+				csvName = "player1"
+			buttonCsv = cfg.get(rom, csvName)
+			buttonList = buttonCsv.split(",")
+		
+	except Exception as e:
+		buttonList = None
+		logging.exception("Error Loading Button Data for [%s][%s] not found in [%s]" % (system, rom, systemConfigFile))
+		
+	return buttonList
+	
+	
 
 '''
 generate a pin mask for the given emulator and button name list.
@@ -264,7 +312,8 @@ def main():
 		systemName = _TEST_SECTION
 	else:
 		# Obtain the list of buttons from the system.xml file
-		blist = getButtonList(systemName, romName)
+		mapfile = _config.get(systemName, "mapfile")
+		blist = getButtonList(mapfile, systemName, romName)
 	
 	
 	# If no buttons were found, lets' generate one from the config.ini.  Simply turn on all known buttons.
