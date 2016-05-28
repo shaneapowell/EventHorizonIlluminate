@@ -202,27 +202,27 @@ B16=12
 Check the output of illuminate.py when manually running it at the command prompt.  The logfile `/tmp/illuminate.log` is also a good place to start.  If need be, add the `-d` option to add more debugging output.  
 
 # FAQ
-**Q: Why do the lights flash slowly 4 times?**
+***Q: Why do the lights flash slowly 4 times?***
 
 A: This indicates that an error occured trying to find the correct buttons to light up. 4 show flashes means that some sort of "default" button configuration was used.  Check the logfile to see what errors caused this.
 
 ---
-**Q: Why do the lights flash quickly 2 times?**
+***Q: Why do the lights flash quickly 2 times?***
 
 A: This indicates a success!  It's quicly telling you that the buttons that are lit up are correct.  It means a mapping was found in one of the .xml files, and in the config.ini file.
 
 ---
-**Q: Can I help with this project?**
+***Q: Can I help with this project?***
 
 A: Yes!!  See `CONTRIBUTE` below.
 
 ---
-**Q: How can I add button definitions for a system?**
+***Q: How can I add button definitions for a system?***
 
-A button definitions are defined in the `systems.ini` file.  Each emulation system has it's own section defined.  Simply add the section for the system that is missing, map the system specific button name to the button name in `config.ini`.  Now, at a minimum, the default buttons should light up when you launch that emulator.
+A: Button definitions are defined in the `systems.ini` file.  Each emulation system has it's own section defined.  Simply add the section for the system that is missing, map the system specific button name to the button name in `config.ini`.  Now, at a minimum, the default buttons should light up when you launch that emulator.
 
 ---
-** Q How can I control game specific buttons?**
+***Q How can I control game specific buttons?***
 
 A: TBA.. (modify the <system name>.xml file)
 
