@@ -138,7 +138,7 @@ fi
 ```	
     
 # SETUP / CONFIGURE
-1 First, create a new file named `config.ini`. Add a [pins] section to map the button names to your LED pins.  It should look like this.
+1 First, edit the file `config.ini`. The [pins] section should start like this, with the buttons orderd 0-15.
 ```
 [pins]
 B1=0
