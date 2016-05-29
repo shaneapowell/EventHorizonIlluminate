@@ -39,7 +39,7 @@ I'm not going to explain in detail how to build the PCB... hopefully after readi
 A look at my completed and soldered circuit board from the back.  Might not look like a mass-produced professional quality board, but it works perfectly.
 ![Soldered](https://raw.githubusercontent.com/shaneapowell/ArcadeIlluminate/master/docs/circuit-board-back-01.jpg)
 
-Here it is installed close to the LED buttons for shorter wire runs.  The globs of glue-gun are there to hold the wire headers together.  Instead of using an 8-pin header, I used individual ones and decided to hold them together with glue so when I removed the pins, they stayed in order.
+Here it is installed close to the LED buttons for shorter wire runs.  Yes, I used red wire despite the connections being on the ground side of the LEDS. It's what I had available.  The globs of glue-gun on the headers are there to hold the wire headers together.  Instead of using an 8-pin header, I used individual ones and decided to hold them together with glue so whenever I needed to removed the wires from the board, they stayed in order.
 ![Installed](https://raw.githubusercontent.com/shaneapowell/ArcadeIlluminate/master/docs/circuit-board-installed.jpg)
 
 ## Parts Needed
