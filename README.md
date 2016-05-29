@@ -56,7 +56,12 @@ https://easyeda.com/normal/PCB-BVv52CAaK.png
 
 I'm not going to explain in detail how to build the PCB... hopefully after reading the Instructables I linked to above, you'll be well on your way to doing your own PCBs in no time (4+ minutes).
 
->insert image of completed PCB here*
+###Completed Board###
+A look at my completed and soldered circuit board from the back.  Might not look like a mass-produced professional quality board, but it works perfectly.
+![Soldered](https://raw.githubusercontent.com/shaneapowell/ArcadeIlluminate/master/docs/circuit-board-back-01.jpg)
+
+Here it is installed close to the LED buttons for shorter wire runs.  The globs of glue-gun are there to hold the wire headers together.  Instead of using an 8-pin header, I used individual ones and decided to hold them together with glue so when I removed the pins, they stayed in order.
+![Installed](https://raw.githubusercontent.com/shaneapowell/ArcadeIlluminate/master/docs/circuit-board-installed.jpg)
 
 ## Parts Needed
 Note.. I got all my parts in larger quantities from eBay since I use them for many other side-projects.  But, I'll provide some ADAFruit links for convenience. I've bought stuff from them before and had great success.
@@ -88,7 +93,9 @@ Worth noting, I used a joystick-button kit from Amazon that included a "Zero Del
 
 # Wire the Circuit Board to the Raspberrry Pi
 TBA - I'll include photos an diagrams how to connect it here.
->insert completed wiring image here*
+>insert completed wiring image here, and rpi closeup*
+You can see the 4 wires running from the illuminate circuit board at the bottom, to my raspberry pi3 at the top.
+![Internals](https://raw.githubusercontent.com/shaneapowell/ArcadeIlluminate/master/docs/internals-back-01.jpg)
 
 # Software Install:
 (I'm going to assume some basic linux command line skills here)
