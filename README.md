@@ -1,26 +1,5 @@
->MIT License
->
->Copyright (c) 2016 Shane Powell
->
->Permission is hereby granted, free of charge, to any person obtaining a copy
->of this software and associated documentation files (the "Software"), to deal
->in the Software without restriction, including without limitation the rights
->to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
->copies of the Software, and to permit persons to whom the Software is
->furnished to do so, subject to the following conditions:
->
->The above copyright notice and this permission notice shall be included in all
->copies or substantial portions of the Software.
->
->THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
->IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
->FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
->AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
->LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
->OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
->SOFTWARE.
 
-# INCOMPLETE.. Please check back soon!! #
+# INCOMPLETE - A work still in progress... Please check back soon!! #
 This project is a work in progress with very active development.  Please be patient and check back soon for a complete and useable tool.
 
 # Arcade Illuminate
@@ -88,14 +67,14 @@ TBA - I'll include photos and diagrams of exactly how mine is wired, and what pa
 
 >insert completed wiring image here*
 
-Worth noting, I used a joystick-button kit from Amazon that included a "Zero Delay LED" encoder with built-in 5v LED power pins.  I'll explain here how I tweaked the wires to work with this software.
-
+Worth noting, I used a joystick-button kit from Amazon that included a "Zero Delay LED" encoder with built-in 5v LED power pins.  I'll explain here soon (with photos) how I tweaked the wires to easily work with this software.  Also, to limit the current draw from my Raspberry Pi, I installed a small dedicated 2A powered USB hub to connect the controllers through.  This meant that all current requirements for the button LEDs are supplied by the hub, not by the Raspberry Pi. 
 
 # Wire the Circuit Board to the Raspberrry Pi
 TBA - I'll include photos an diagrams how to connect it here.
 >insert completed wiring image here, and rpi closeup*
 You can see the 4 wires running from the illuminate circuit board at the bottom, to my raspberry pi3 at the top.
 ![Internals](https://raw.githubusercontent.com/shaneapowell/ArcadeIlluminate/master/docs/internals-back-01.jpg)
+
 
 # Software Install:
 (I'm going to assume some basic linux command line skills here)
