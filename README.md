@@ -3,7 +3,7 @@
 This project is a work in progress with very active development.  Please be patient and check back soon for a complete and useable tool.
 
 # Arcade Illuminate
-A super-simple circuit board and python script that can control arcade cabinet button LEDs.  It's running on my system with 5v LEDs, but should have no problem running almost any voltage, and up to about an amp of current.  If you have the skills to build your own RetroPie cabinet.. odds are you have the skills to build one of these circuit boards.
+A super-simple circuit board and python script that can control arcade cabinet button LEDs.  Have the buttons light up on a per-game or per-system basis.  It's running on my system with 5v LEDs, but should have no problem running almost any voltage, and up to about an amp of current.  If you have the skills to build your own RetroPie cabinet.. odds are you have the skills to build one of these circuit boards.
 
 How it works?  The circuit board is designed to be wired to the `ground`, or negative side of the LEDs.  The switching of the current is done by allowing the voltage to flow `into` the board from the LED, not sending voltage `out` to the LEDs.  The advantage of this is that you should be free to use almost any voltage on your LEDs as you want.  It also means you don't need to rely on your Raspberry Pi to provide the 5v of power to your LEDs.  The buttons I have, happen to be 5v LEDs.  This circuit board should have no trouble at all handling 12v LEDs.
 
