@@ -143,15 +143,15 @@ def getINIButtonList(mapfile, system, rom):
 		systemConfigFile = "%s/%s" % (_basePath, mapfile)
 		cfg = ConfigParser()
 		cfg.read(systemConfigFile)
-		print(str(cfg.sections()))
 		
 		if cfg.has_section(rom) == False:
 			logging.warning("ROM:[%s] section not found in [%s]" %(rom, systemConfigFile))
 			return None
 			
 		numPlayers = cfg.getint(rom, "numplayers")
-		simultaneous = True == cfg.getboolean(rom, "alternating")
-		print(simultaneous)
+		simultaneous = False == cfg.getboolean(rom, "alternating")
+		
+		logging.info("Players:[%d] Simultaneous:[%s]" % (numPlayers, simultaneous))
 		
 		for playerIndex in range(0, numPlayers if simultaneous else 1):
 			remapPlayer1 = False
@@ -160,7 +160,8 @@ def getINIButtonList(mapfile, system, rom):
 				logging.warning("Player:[%s] option not found in rom section:[%s] defaulting to player1 mapping" %(csvName, rom))
 				csvName = "player1"
 			buttonCsv = cfg.get(rom, csvName)
-			buttonList = buttonCsv.split(",")
+			buttonList += buttonCsv.split(",")
+			logging.info("Player[%d] Button List [%s]" % (playerIndex, str(buttonCsv)))
 		
 	except Exception as e:
 		buttonList = None
@@ -293,7 +294,7 @@ def main():
 	else:
 		logging.basicConfig(level=logging.INFO)
 	
-	logging.info("System:[%s] ROM:[%s]")
+	logging.info("System:[%s] ROM:[%s]" % (systemName, romName))
 	
 	# Load the confg file into memory
 	loadConfig()
