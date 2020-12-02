@@ -87,36 +87,25 @@ You can see the 4 wires running from the illuminate circuit board at the bottom,
 3 Download the `illuminate.py`, `config.ini` and each `.xml` file into their own folder. eg `/home/pi/illuminate`.  The easiest way to get all the files here is to just clone the repo.  Given that I intend to try and keep the xml definition files as up to date as I can.. this might be good for auto-updating your own instalation. 
 > cd /home/pi; git clone https://github.com/shaneapowell/ArcadeIlluminate.git illuminate
 
-4 Edit the shell script `runcommand.sh` located in `/opt/retropie/supplementary/runcommand`.  Find the section near the bottom that contains the following section of text:
+4 Create the shell script `/opt/retropie/configs/all/runcommand-onstart.sh` with the following contents:
 ```
-# launch the command - don't redirect stdout for frotz,  when using console output or when not using _SYS_
-# frotz is included in case its emulators.cfg is out of date and missing CON: - can be removed in the future
-if [[ "$emulator" == frotz || "$is_console" -eq 1 || "$is_sys" -eq 0 ]]; then
-  # turn cursor on
-  tput cnorm
-  eval $command </dev/tty 2>/tmp/runcommand.log
-else
-  eval $command </dev/tty &>/tmp/runcommand.log
-fi
+#!/bin/sh
+system="$1"
+rom=$(basename "$2")
+echo "$system $rom"
+/home/pi/illuminate/illuminate.py "$system" "$rom" &>/tmp/illuminate.log
 ```
 
-    - Above that section add the following lines of text:
+5 Create the shell script `/opt/retropie/configs/all/runcommand-onend.sh` with the follwing contents:
 ```
-# Illumination #
-/home/pi/illuminate/illuminate.py "$system" "$rom_bn" &>/tmp/illuminate.log
-# End-Illumination #
-```		
+#!/bin/sh
+/home/pi/illuminate/illuminate.py emulationstation default
+```
     
-5 Below that section add the following lines of text:
-```
-# Illumination #
-/home/pi/illuminate/illuminate.py emulationstation default &>>/tmp/illuminate.log
-# End-Illumination #
-```
 		
 6 Edit the shell script `emulationstation.sh` located in `/opt/retropie/supplementary/emulationstation`.  Find the line 
 ```
-./emulationstation "$@"
+$esdir/emulationstation "$@"
 ```
 7 Above that line, add the following
 ```	
