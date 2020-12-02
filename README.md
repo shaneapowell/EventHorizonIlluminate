@@ -81,8 +81,9 @@ You can see the 4 wires running from the illuminate circuit board at the bottom,
 
 1 Ensure you have Python3 installed.  try typing "python --version" or "python3 --version" at a command prompt.   Retropie comes with python3 already installed.
 
-2 Install the i2c Python library 
+2 Install and enable the i2c Python library 
   `sudo apt-get install python3-smbus` 
+  `sudo raspi-config' Interface Options -> I2C Enable
 
 3 Download the `illuminate.py`, `config.ini` and each `.xml` file into their own folder. eg `/home/pi/illuminate`.  The easiest way to get all the files here is to just clone the repo.  Given that I intend to try and keep the xml definition files as up to date as I can.. this might be good for auto-updating your own instalation. 
 > cd /home/pi; git clone https://github.com/shaneapowell/ArcadeIlluminate.git illuminate
