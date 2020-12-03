@@ -92,7 +92,7 @@ You can see the 4 wires running from the illuminate circuit board at the bottom,
 ```
 #!/bin/sh
 system="$1"
-rom=$(basename "$2")
+rom=$(basename "$3" .zip)
 /home/pi/illuminate/illuminate.py "$system" "$rom" &>/tmp/illuminate.log
 ```
 
