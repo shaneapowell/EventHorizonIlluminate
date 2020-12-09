@@ -76284,6 +76284,44 @@ Press Punch &amp; Kick while opponent is on the ground to attempt a Pin.</MiscDe
       </Labels>
     </Player>
   </Game>
+  <Game RomName="rtype" GameName="R-Type" NumPlayers="2" Alternating="1" Mirrored="1" UsesService="1" Tilt="0" Cocktail="1">
+    <Status Verified="0" />
+    <MiscDetails>The longer you hold down the fire button, the stronger the shot.  The force button 'shoots' or recalls a power-up piece from and to your ship.   Mame has four buttons for this game for some reason, but only uses the first two.  The game has the fire and force buttons on both sides of the joystick, but not 'mirrored': the force is to the left of the fire button on both sides of the joystick.  NOTE  In Mame this game actually has four buttons.  This is due to some sloppy code and nothing more.  The dipswitches between this game and a similar game running on the same system were identical, so the input function was simply re-routed to that game.  This needs to be removed asap.</MiscDetails>
+    <Player Number="1" NumButtons="2">
+      <Controls>
+        <Control Name="8-way Joystick">
+          <Constant Name="joy8way" />
+        </Control>
+      </Controls>
+      <Labels>
+        <Label Name="P1_BUTTON1" Value="Fire" Color="Red" />
+        <Label Name="P1_BUTTON2" Value="Force" Color="Black" />
+        <Label Name="P1_JOYSTICK_RIGHT" Value="Right" Color="Black" />
+        <Label Name="P1_JOYSTICK_LEFT" Value="Left" Color="Black" />
+        <Label Name="P1_JOYSTICK_DOWN" Value="Down" Color="Black" />
+        <Label Name="P1_JOYSTICK_UP" Value="Up" Color="Black" />
+      </Labels>
+    </Player>
+  </Game>
+  <Game RomName="rtypeu" GameName="R-Type" NumPlayers="2" Alternating="1" Mirrored="1" UsesService="1" Tilt="0" Cocktail="1">
+    <Status Verified="0" />
+    <MiscDetails>The longer you hold down the fire button, the stronger the shot.  The force button 'shoots' or recalls a power-up piece from and to your ship.   Mame has four buttons for this game for some reason, but only uses the first two.  The game has the fire and force buttons on both sides of the joystick, but not 'mirrored': the force is to the left of the fire button on both sides of the joystick.  NOTE  In Mame this game actually has four buttons.  This is due to some sloppy code and nothing more.  The dipswitches between this game and a similar game running on the same system were identical, so the input function was simply re-routed to that game.  This needs to be removed asap.</MiscDetails>
+    <Player Number="1" NumButtons="2">
+      <Controls>
+        <Control Name="8-way Joystick">
+          <Constant Name="joy8way" />
+        </Control>
+      </Controls>
+      <Labels>
+        <Label Name="P1_BUTTON1" Value="Fire" Color="Red" />
+        <Label Name="P1_BUTTON2" Value="Force" Color="Black" />
+        <Label Name="P1_JOYSTICK_RIGHT" Value="Right" Color="Black" />
+        <Label Name="P1_JOYSTICK_LEFT" Value="Left" Color="Black" />
+        <Label Name="P1_JOYSTICK_DOWN" Value="Down" Color="Black" />
+        <Label Name="P1_JOYSTICK_UP" Value="Up" Color="Black" />
+      </Labels>
+    </Player>
+  </Game>
   <Game RomName="rtype2" GameName="R-Type II" NumPlayers="2" Alternating="1" Mirrored="1" UsesService="1" Tilt="0" Cocktail="1">
     <Status Verified="0" />
     <MiscDetails>The longer you hold down the fire button, the stronger the shot.  The force button 'shoots' or recalls a power-up piece from and to your ship.   Mame has four buttons for this game for some reason, but only uses the first two.  The game has the fire and force buttons on both sides of the joystick, but not 'mirrored': the force is to the left of the fire button on both sides of the joystick.  NOTE  In Mame this game actually has four buttons.  This is due to some sloppy code and nothing more.  The dipswitches between this game and a similar game running on the same system were identical, so the input function was simply re-routed to that game.  This needs to be removed asap.</MiscDetails>
