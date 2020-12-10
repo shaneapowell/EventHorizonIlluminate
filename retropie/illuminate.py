@@ -3,7 +3,7 @@
 '''
 MIT License
 
-Copyright (c) 2016 Shane Powell
+Copyright (c) 2020 Shane Powell
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -24,32 +24,24 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
 import argparse
-import os, sys, getopt, time
+import serial, os, sys, getopt, time
 import xml.etree.ElementTree as ET
 from configparser import ConfigParser
-import smbus
 import logging
 
 
 # Constants
 _SETTINGS_SECTION="settings"
 _TEST_SECTION="TEST"
-_PINS_SECTION="pins"
+_USB_SECTION="USB"
 _SYSTEMS_FILE="systems.ini"
 _CONFIG_FILE="config.ini"
 _REMAP_Pn_PREFIX_FORMAT="P%d_"
-_I2C_ADDRESS = 0x20
-_I2C_IODIR_BANK0 = 0x00
-_I2C_IODIR_BANK1 = 0x01
-_I2C_LATCH_BANK0 = 0x12
-_I2C_LATCH_BANK1 = 0x13
-_I2C_ALL_OFF_PINMASK = 0x0000
-_I2C_FLASH_INTERVAL = 0.200
+_FLASH_INTERVAL = 200
 
 # Class variables
 _basePath=None
 _config=None
-
 
 
 '''
@@ -172,77 +164,70 @@ def getINIButtonList(mapfile, system, rom):
 	
 
 '''
-generate a pin mask for the given emulator and button name list.
-The config.ini file is referenced and the pins are mapped first 
+generate a button ID list for the given emulator and button name list.
+The config.ini file is referenced and the IDs are mapped first 
 by looking for the emulator named section, then cross-referencing
-those names with those in the [pins] section.  Using those pins
-numbers, generate a 4 byte pin map corrisponding to what the 
-MCP23017 will expect for each of it's 2 banks of pins. 
+those names with those in the [USB] section.  Using those ID
+numbers, generate a list of IDs to send to the USB.
 '''
-def getPinMask(emulatorName, buttonNameList):
-	logging.info("Generating i2c LED pin mask for...\n  emulator:[%s]\n  buttons:%s" % (emulatorName, buttonNameList))
+def getButtonIdList(emulatorName, buttonNameList):
+	logging.info("Generating LED button list for...\n  emulator:[%s]\n  buttons:%s" % (emulatorName, buttonNameList))
 	
 	btnList = []
-	i2cPinMask = 0x0000
+	idList = []
 	
 	for buttonName in buttonNameList:
-		pin = getButtonPin(emulatorName, buttonName)
-		if pin >= 0:
-			btnList.append(buttonName)
-			i2cPinMask = i2cPinMask | 0x01 << pin
+		id = getButtonId(emulatorName, buttonName)
+		if id >= 0:
+			idList.append(id)
 	
-	logging.info("Generated PinMask...\n  PinMask:[0x%x]\n  buttons:%s" % (i2cPinMask, btnList))
+	logging.info("Generated ButtonIdList...\n  ButtonIdList:%s\n  buttons:%s" % (idList, btnList))
 		
-	return i2cPinMask
+	return idList
 		
 		
 
 '''
-Send the provided 4 byte pin mask to the MCP27017 i2c chip.  the boolean printOnly will perform
+Send the provided command to the USB.  the boolean printOnly will perform
 shifting and calculations to generate the output bytes, but will refrain from actually connecting 
 to, and sending the bytes to the i2c chip.  This is usefull mostly just for debugging locally.
 '''
-def sendPinMask(pinMask, printOnly):
+def sendCommand(tty, command, printOnly):
 	
-	bank0 = pinMask & 0xff
-	bank1 = (pinMask >> 8) & 0xff
-	logging.info("Sending PinMask:[0x%x] -> bank1:[0x%x] bank0:[0x%x] to I2C address [0x%x]" % (pinMask, bank1, bank0, _I2C_ADDRESS))
+	logging.info("Sending Command:[%s]" % (command))
 	
 	if printOnly == True:
 		return
 		
-	# Set all pins to OUTPUT
-	bus = smbus.SMBus(1)	
-	bus.write_i2c_block_data(_I2C_ADDRESS, _I2C_IODIR_BANK0, [0x00])
-	bus.write_i2c_block_data(_I2C_ADDRESS, _I2C_IODIR_BANK1, [0x00])
-
-	# Latch desired pins
-	pinBytes = bytes(2)
-	bus.write_i2c_block_data(_I2C_ADDRESS, _I2C_LATCH_BANK0, [bank0])
-	bus.write_i2c_block_data(_I2C_ADDRESS, _I2C_LATCH_BANK1, [bank1])
+	# Send to the usb serial port
+	command += "\n"
+	ser = serial.Serial(tty, 9600, timeout=0.5)
+	ser.write(command.encode())
+	ser.flush()
+	ser.close()
 
 
 
 '''
-Look up the led pin in the config for the given emulator and button name.
+Look up the led butotn in the config for the given emulator and button name.
 the emulator name is the section title in the config.ini, the button name
 is the key of an entry in that section.  After finding they value for the
-desired key, a 2nd lookup is done in the "pins" section for the actual
-LED output pin.  If the pin was not found, a -1 is returned
+desired key, a 2nd lookup is done in the "USB" section for the actual
+LED output index.  If the button was not found, a -1 is returned
 '''
-def getButtonPin(emulatorName, buttonName):
+def getButtonId(emulatorName, buttonName):
 	global _basePath
 	global _config
 	try:
-		logging.debug("Getting pin # for emulator:[%s] button:[%s]" % (emulatorName, buttonName))
+		logging.debug("Getting button ID for emulator:[%s] button:[%s]" % (emulatorName, buttonName))
 		btnCode = _config.get(emulatorName, buttonName)
 		logging.debug("Found Button Code:[%s] in emulator section:[%s]" % (btnCode, emulatorName))
-		pin = _config.get(_PINS_SECTION, btnCode)
-		logging.debug("Found Pin:[%s] in section:[%s] for button:[%s]" % (pin, _PINS_SECTION, btnCode))
+		btnId = _config.get(_USB_SECTION, btnCode)
+		logging.debug("Found Button Id:[%s] in section:[%s] for button:[%s]" % (btnId, _USB_SECTION, btnCode))
 	except:
-		logging.error("Pin not found in [%s] for emulator:[%s] button:[%s] . Skipping" % (_CONFIG_FILE, emulatorName, buttonName))
+		logging.error("Button not found in [%s] for emulator:[%s] button:[%s] . Skipping" % (_CONFIG_FILE, emulatorName, buttonName))
 		return -1
-	return int(pin)
+	return int(btnId)
 
 
 '''
@@ -261,21 +246,21 @@ def loadConfig():
 	
 	# Add our special TEST section
 	_config.add_section(_TEST_SECTION)
-	#pins = _config.options(_PINS_SECTION)
-	for pin in _config.items(_PINS_SECTION):
-		_config.set(_TEST_SECTION, pin[0], pin[0])
+	for btn in _config.items(_USB_SECTION):
+		_config.set(_TEST_SECTION, btn[0], btn[0])
 	
 
 '''
 '''
 def main():
-	parser = argparse.ArgumentParser(description="Game Console LED Controller. To manually test lights, use 'TEST' for <system> and the button name from the 'pins' section in the config.\n\n example:  illuminate.py -d TEST B3")
+	parser = argparse.ArgumentParser(description="Game Console LED Controller. To manually test lights, use 'TEST' for <system> and the button name from the 'USB' section in the config.\n\n example:  illuminate.py -d TEST B3")
 	parser.add_argument("-c", "--config", dest="configdir", default=os.path.dirname(os.path.realpath(__file__)), help="Path to location of all xml conf files. Default is the directory this script is located.")
 	parser.add_argument("-p", "--printonly", action="store_true", default=False, help="Print result only, don't send LED lightup commands through i2c bus")
 	parser.add_argument("-d", "--debug", action="store_true", default=False, help="Enable Debugging logging.")
 	parser.add_argument("-f", "--noflash", action="store_true", default=False, help="Force disable flashing of lights when button LEDs are enabled")
 	parser.add_argument("system", help="The name of the emulator system being run. eg.. 'mame-mame4all', 'psx', 'snes'...etc.  Use 'TEST' to test specific buttons.")
 	parser.add_argument("rom", help="The rom being run. When using the 'TEST' emulator option, pass in B1 to B16 to manually turn on a LED")
+	parser.add_argument("tty", help="The USB Serial Port the module is connected to. eg: /dev/ttyACM0")
 	args = parser.parse_args()
 		
 	global _basePath
@@ -303,8 +288,8 @@ def main():
 		
 	# Special Case emulator "TEST" bypasses the xml lookup, and directly sets the button by name 
 	if systemName == _TEST_SECTION:
-		mask = getPinMask(systemName, [romName])
-		sendPinMask(mask, args.printonly)
+		idList = getButtonIdList(systemName, [romName])
+		sendCommand(args.tty, "flash 2 %d %s" % (_FLASH_INTERVAL, idList), args.printonly)
 		return
 	
 	
@@ -333,27 +318,17 @@ def main():
 		for btn in _config.items(systemName):
 			blist.append(btn[0])
 		
-	# Generate a pin mask for the desired buttons 
-	pinMask = getPinMask(systemName, blist)
+	# Generate a button ID list for the desired buttons 
+	idList = getButtonIdList(systemName, blist)
+	idList = map(str, idList)
+	idList = ' '.join(idList)
 	
 	# Flash the buttons to tell the user a default was used
 	if enableFallbackFlashIndicator and args.noflash == False:
-		for index in range(0, 4):
-			sendPinMask(pinMask, args.printonly)
-			time.sleep(_I2C_FLASH_INTERVAL)
-			sendPinMask(_I2C_ALL_OFF_PINMASK, args.printonly)
-			time.sleep(_I2C_FLASH_INTERVAL)
+		sendCommand(args.tty, "flash 2 %d %s" % (_FLASH_INTERVAL, idList), args.printonly)
 	elif args.noflash == False:
 		# Quick-Flash the buttons to indicate an accurate mapping
-		for index in range(0, 2):
-			sendPinMask(pinMask, args.printonly)
-			time.sleep(_I2C_FLASH_INTERVAL/2)
-			sendPinMask(_I2C_ALL_OFF_PINMASK, args.printonly)
-			time.sleep(_I2C_FLASH_INTERVAL/2)
-	
-	# Fire up the buttons!!
-	sendPinMask(pinMask, args.printonly)
-	
+		sendCommand(args.tty, "flash 2 %d %s" % (_FLASH_INTERVAL/2, idList), args.printonly)
 	
 
 if __name__ == "__main__":
