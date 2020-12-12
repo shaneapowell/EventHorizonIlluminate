@@ -37,7 +37,7 @@ _USB_SECTION="USB"
 _SYSTEMS_FILE="systems.ini"
 _CONFIG_FILE="config.ini"
 _REMAP_Pn_PREFIX_FORMAT="P%d_"
-_FLASH_INTERVAL = 200
+_FLASH_INTERVAL = 100
 
 # Class variables
 _basePath=None
@@ -200,7 +200,7 @@ def sendCommand(tty, command, printOnly):
 		return
 		
 	# Send to the usb serial port
-	command += "\n"
+	command += "\r"
 	ser = serial.Serial(tty, 9600, timeout=0.5)
 	ser.write(command.encode())
 	ser.flush()
@@ -325,10 +325,12 @@ def main():
 	
 	# Flash the buttons to tell the user a default was used
 	if enableFallbackFlashIndicator and args.noflash == False:
-		sendCommand(args.tty, "flash 2 %d %s" % (_FLASH_INTERVAL, idList), args.printonly)
+		sendCommand(args.tty, "flash 2 %d %s" % (_FLASH_INTERVAL*3, idList), args.printonly)
+		sendCommand(args.tty, "on %s" % (idList), args.printonly)
 	elif args.noflash == False:
 		# Quick-Flash the buttons to indicate an accurate mapping
-		sendCommand(args.tty, "flash 2 %d %s" % (_FLASH_INTERVAL/2, idList), args.printonly)
+		sendCommand(args.tty, "flash 2 %d %s" % (_FLASH_INTERVAL, idList), args.printonly)
+		sendCommand(args.tty, "on %s" % (idList), args.printonly)
 	
 
 if __name__ == "__main__":
