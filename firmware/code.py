@@ -115,7 +115,7 @@ def buttonsSequence(args, debug):
         buttonsOn(idList, debug)
         time.sleep(0.05)
 
-
+time.sleep(0.5)
 # Main Loop
 print("Waiting for Command...")
 while True:
