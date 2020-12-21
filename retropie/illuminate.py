@@ -329,7 +329,15 @@ def main():
 		sendCommand(args.tty, "on %s" % (idList), args.printonly)
 	elif args.noflash == False:
 		# Quick-Flash the buttons to indicate an accurate mapping
-		sendCommand(args.tty, "flash 2 %d %s" % (_FLASH_INTERVAL, idList), args.printonly)
+		sendCommand(args.tty, "flash 2 %d %s" % (/home/spowell/devel/ArcadeIlluminate/retropie/config.ini
+/home/spowell/devel/ArcadeIlluminate/retropie/megadrive.ini
+/home/spowell/devel/ArcadeIlluminate/retropie/n64.ini
+/home/spowell/devel/ArcadeIlluminate/retropie/nes.ini
+/home/spowell/devel/ArcadeIlluminate/retropie/psx.ini
+/home/spowell/devel/ArcadeIlluminate/retropie/snes.ini
+/home/spowell/devel/ArcadeIlluminate/retropie/systems.ini
+/home/spowell/devel/ArcadeIlluminate/retropie/illuminate.py
+/home/spowell/devel/ArcadeIlluminate/retropie/arcade.xml, idList), args.printonly)
 		sendCommand(args.tty, "on %s" % (idList), args.printonly)
 	
 

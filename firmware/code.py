@@ -2,33 +2,39 @@ import board, digitalio
 import supervisor, sys, time
 import adafruit_dotstar as dotstar
 
-# Button ID to BIT Dict
-BUTTON_BIT_LOOKUP = {
-    1: 0,
-    2: 1,
-    3: 2,
-    4: 3,
-    5: 7,
-    6: 6,
-    7: 5,
-    8: 4,
-    9: 8,
-    10: 9,
-    11: 10,
-    12: 11,
-    13: 15,
-    14: 14,
-    15: 14,
-    16: 12,
-    17: 16,
-    18: 17,
-    19: 18,
-    20: 19,
-    21: 20,
-    22: 21,
-    23: 22,
-    24: 23,
-}
+# Button ID to BIT Dict/Lookup. Buttons are indexed 1-24
+BUTTON_BIT_LOOKUP = [
+    -1,
+    0, 
+    1,
+    2,
+    3,
+
+    7,
+    6,
+    5,
+    4,
+
+    8,
+    9,
+    10,
+    11,
+
+    15,
+    14,
+    13,
+    12,
+
+    16,
+    17,
+    18,
+    19,
+
+    23,
+    22,
+    21,
+    20
+]
 
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
@@ -102,20 +108,24 @@ def buttonsFlash(buttonIds, debug):
         buttonsOff(debug)
         time.sleep(float(intervalMs) / 1000.0)
 
-def buttonsSequence(args, debug):
+def buttonsSequence(intervalMs, debug):
     """Flash quickly on/off each button 1-24 in quick order"""
     print("> sequence")
     idList = []
     for id in range(1,25):
         idList.append(id)
         buttonsOn(idList, debug)
-        time.sleep(0.05)
+        time.sleep(intervalMs)
+    time.sleep(intervalMs*2)
     while idList:
         idList.pop()
         buttonsOn(idList, debug)
-        time.sleep(0.05)
+        time.sleep(intervalMs)
 
+dot[0] = BLUE
 time.sleep(0.5)
+buttonsSequence(0.02, False)
+
 # Main Loop
 print("Waiting for Command...")
 while True:
@@ -137,7 +147,7 @@ while True:
                 elif cmd == "flash": 
                     buttonsFlash(args, debug)
                 elif cmd == "seq":
-                    buttonsSequence(args, debug)
+                    buttonsSequence(0.05, debug)
             print("Waiting for Command...")
     except Exception as err:
         print("Error: {0}".format(err))
