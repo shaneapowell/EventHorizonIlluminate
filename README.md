@@ -1,3 +1,8 @@
+# NOTES for v2:
+- add usbhid.jspoll=1 to /boot/config.txt
+- use Atmel USB VID/PID (https://microchipsupport.force.com/s/article/Using-Atmel-VID-PID)
+- Add auto-config support to retro arch? (https://github.com/libretro/retroarch-joypad-autoconfig/blob/master/hid/8BitDo_Zero2_gamepad_BT.cfg)
+
 
 # INCOMPLETE - A work still in progress... Please check back soon!! #
 This project is a work in progress with very active development.  Please be patient and check back soon for a complete and useable tool.
