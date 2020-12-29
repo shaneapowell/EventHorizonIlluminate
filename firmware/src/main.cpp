@@ -25,9 +25,9 @@ SOFTWARE.
 #include "main.h"
 
 TaskHandle_t handleTaskJoystick;
-TaskHandle_t handleTaskB;
+TaskHandle_t handleTaskSerial;
+TaskHandle_t handleTaskGpio;
 TaskHandle_t handleMonitorTask;
-
 
 /****************************************************************
  * Can use these function for RTOS delays
@@ -50,19 +50,19 @@ void _threadDelayMs(int ms)
  ************************************************/
 void setup() 
 {
-    pinMode(PIN_DATA, OUTPUT);
-    pinMode(PIN_CLOCK, OUTPUT);
-    pinMode(PIN_STROBE, OUTPUT);
-    pinMode(PIN_ONBOARD_LED, OUTPUT);
-
-    SERIAL.begin(9600);
+    Serial.begin(9600);
     delay(1000);  // prevents usb driver crash on startup, do not omit this
+    
+    pinMode(PIN_ONBOARD_LED, OUTPUT);
+    gpioSetup();
 
     vSetErrorLed(PIN_ONBOARD_LED, HIGH);
-    vSetErrorSerial(&SERIAL);
+    vSetErrorSerial(&Serial);
 
-    xTaskCreate(_threadProcessJoystick,     "Joystick Task",       256, NULL, tskIDLE_PRIORITY + 3, &handleTaskJoystick);
-    xTaskCreate(_threadProcessSerial,     "Task B",       256, NULL, tskIDLE_PRIORITY + 2, &handleTaskB);
+
+    xTaskCreate(_threadProcessGpio,     "GPIO Task",      256, NULL, tskIDLE_PRIORITY + 1, &handleTaskGpio);
+    xTaskCreate(_threadProcessJoystick, "Joystick Task",  256, NULL, tskIDLE_PRIORITY + 1, &handleTaskJoystick);
+    xTaskCreate(_threadProcessSerial,   "Serial Task",    256, NULL, tskIDLE_PRIORITY + 1, &handleTaskSerial);
 //    xTaskCreate(taskMonitor, "Task Monitor", 256, NULL, tskIDLE_PRIORITY + 1, &handleMonitorTask);
 
     /* Start the RTOS, this function will never return and will schedule the tasks. */
@@ -71,8 +71,8 @@ void setup()
     /* error scheduler failed to start. should never get here */
     while(1)
     {
-        SERIAL.println("Scheduler Failed! \n");
-        SERIAL.flush();
+        Serial.println("Scheduler Failed! \n");
+        Serial.flush();
         delay(1000);
     }
    
