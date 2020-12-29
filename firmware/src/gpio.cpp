@@ -206,7 +206,7 @@ void gpioSetLed(LED l, bool on)
  * joystcick and buttons, checks the states for changes, and writes
  * back the report over the HID.
  *****************************************************************/
-void gpioSetup()
+static void _gpioSetup()
 {
 
     Wire.setClock(1700000); 
@@ -266,6 +266,7 @@ void gpioSetup()
 
 void _threadProcessGpio( void *pvParameters )
 {
+    _gpioSetup();
 
     while(true)
     {
@@ -276,7 +277,6 @@ void _threadProcessGpio( void *pvParameters )
         /* Read Input */
         _mcpAIn = _mcpA.readGPIOAB();
         
-        //_threadDelayMs(1);
         taskYIELD();
         
     }

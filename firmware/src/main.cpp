@@ -25,7 +25,7 @@ SOFTWARE.
 #include "main.h"
 
 TaskHandle_t handleTaskJoystick;
-TaskHandle_t handleTaskSerial;
+TaskHandle_t handleTaskCmd;
 TaskHandle_t handleTaskGpio;
 TaskHandle_t handleMonitorTask;
 
@@ -50,11 +50,10 @@ void _threadDelayMs(int ms)
  ************************************************/
 void setup() 
 {
-    Serial.begin(9600);
+    Serial.begin(57600);
     delay(1000);  // prevents usb driver crash on startup, do not omit this
     
     pinMode(PIN_ONBOARD_LED, OUTPUT);
-    gpioSetup();
 
     vSetErrorLed(PIN_ONBOARD_LED, HIGH);
     vSetErrorSerial(&Serial);
@@ -62,7 +61,7 @@ void setup()
 
     xTaskCreate(_threadProcessGpio,     "GPIO Task",      256, NULL, tskIDLE_PRIORITY + 1, &handleTaskGpio);
     xTaskCreate(_threadProcessJoystick, "Joystick Task",  256, NULL, tskIDLE_PRIORITY + 1, &handleTaskJoystick);
-    xTaskCreate(_threadProcessSerial,   "Serial Task",    256, NULL, tskIDLE_PRIORITY + 1, &handleTaskSerial);
+    xTaskCreate(_threadProcessCmd,      "Command Task",   256, NULL, tskIDLE_PRIORITY + 1, &handleTaskCmd);
 //    xTaskCreate(taskMonitor, "Task Monitor", 256, NULL, tskIDLE_PRIORITY + 1, &handleMonitorTask);
 
     /* Start the RTOS, this function will never return and will schedule the tasks. */

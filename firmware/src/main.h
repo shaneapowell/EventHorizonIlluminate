@@ -28,11 +28,15 @@ SOFTWARE.
 #include <FreeRTOS_SAMD21.h>
 
 #define PROGRAM_NAME    "ArcadeIlluminate"
-#define PROGRAM_VERSION "1.0"
+#define PROGRAM_VERSION "v1.0"
 #define PIN_ONBOARD_LED     13
+
+#define BUTTON_COUNT    16
+#define LED_COUNT       12
 
 typedef enum
 {
+    JOYSTICK_NULL = -1,
     JOYSTICK_UP = 0,
     JOYSTICK_DOWN,
     JOYSTICK_LEFT,
@@ -41,6 +45,7 @@ typedef enum
 
 typedef enum
 {
+    BUTTON_NULL = -1,
     BUTTON_B1 = 0,
     BUTTON_B2,
     BUTTON_B3,
@@ -61,6 +66,7 @@ typedef enum
 
 typedef enum 
 {
+    LED_NULL = -1,
     LED_B1 = 0,
     LED_B2,
     LED_B3,
@@ -72,7 +78,7 @@ typedef enum
     LED_B9,
     LED_B10,
     LED_B11,
-    LED_B12,
+    LED_B12
 } LED;
 
 
@@ -80,10 +86,9 @@ void _threadDelayUs(int us);
 void _threadDelayMs(int ms);
 void _threadProcessGpio( void *pvParameters );
 void _threadProcessJoystick( void *pvParameters );
-void _threadProcessSerial( void *pvParameters ); 
+void _threadProcessCmd( void *pvParameters ); 
 void _threadProcessMonitor(void *pvParameters);
 
-void gpioSetup();
 bool gpioGetJoystick(JOYSTICK j);
 bool gpioGetButton(BUTTON b);
 void gpioSetLed(LED l, bool on);
