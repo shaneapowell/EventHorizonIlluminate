@@ -66,8 +66,8 @@ Adafruit_MCP23017 _mcpB;
  *    MCPB       MCPA
  * 31 .... 16 15 .... 0 
 */
-uint32_t _mcpOut = 0x0;
-uint32_t _mcpIn = 0;
+uint32_t _mcpOut = 0;
+uint32_t _mcpIn  = 0;
 
 
 /*****************************************************************

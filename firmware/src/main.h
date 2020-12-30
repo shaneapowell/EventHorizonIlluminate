@@ -44,7 +44,6 @@ typedef enum
 
 typedef enum
 {
-    BUTTON_NULL = -1,
     BUTTON_B1 = 0,
     BUTTON_B2,
     BUTTON_B3,
@@ -87,6 +86,7 @@ void _threadProcessGpio( void *pvParameters );
 void _threadProcessJoystick( void *pvParameters );
 void _threadProcessCmd( void *pvParameters ); 
 void _threadProcessMonitor(void *pvParameters);
+void _dumpProcessMonitor();
 
 bool gpioGetJoystick(JOYSTICK j);
 bool gpioGetButton(BUTTON b);

@@ -27,7 +27,6 @@ SOFTWARE.
 TaskHandle_t handleTaskJoystick;
 TaskHandle_t handleTaskCmd;
 TaskHandle_t handleTaskGpio;
-TaskHandle_t handleMonitorTask;
 
 /****************************************************************
  * Can use these function for RTOS delays
@@ -61,8 +60,7 @@ void setup()
 
     xTaskCreate(_threadProcessGpio,     "GPIO Task",      256, NULL, tskIDLE_PRIORITY + 1, &handleTaskGpio);
     xTaskCreate(_threadProcessJoystick, "Joystick Task",  256, NULL, tskIDLE_PRIORITY + 1, &handleTaskJoystick);
-    xTaskCreate(_threadProcessCmd,      "Command Task",   256, NULL, tskIDLE_PRIORITY + 1, &handleTaskCmd);
-//    xTaskCreate(taskMonitor, "Task Monitor", 256, NULL, tskIDLE_PRIORITY + 1, &handleMonitorTask);
+    xTaskCreate(_threadProcessCmd,      "Command Task",   384, NULL, tskIDLE_PRIORITY + 1, &handleTaskCmd);
 
     /* Start the RTOS, this function will never return and will schedule the tasks. */
     vTaskStartScheduler();
@@ -86,5 +84,54 @@ void loop()
     // Optional commands, can comment/uncomment below
     delay(100); //delay is interrupt friendly, unlike vNopDelayMS
     return;
+
+}
+
+
+//*****************************************************************
+// Task will periodically print out useful information about the tasks running
+// Is a useful tool to help figure out stack sizes being used
+// Run time stats are generated from all task timing collected since startup
+// No easy way yet to clear the run time stats yet
+//*****************************************************************
+static char ptrTaskList[400]; //temporary string buffer for task stats
+
+void _dumpProcessMonitor()
+{
+    int x;
+    int measurement;
+    
+
+    // run this task afew times before exiting forever
+    Serial.flush();
+    Serial.println("");			 
+    Serial.println("****************************************************");
+    Serial.print("Free Heap: ");
+    Serial.print(xPortGetFreeHeapSize());
+    Serial.println(" bytes");
+
+    Serial.print("Min Heap: ");
+    Serial.print(xPortGetMinimumEverFreeHeapSize());
+    Serial.println(" bytes");
+    Serial.flush();
+
+    Serial.println("----------------------------------------------------");
+    Serial.println("Task            ABS             %Util");
+    Serial.println("----------------------------------------------------");
+
+    vTaskGetRunTimeStats(ptrTaskList); //save stats to char array
+    Serial.println(ptrTaskList); //prints out already formatted stats
+    Serial.flush();
+
+    Serial.println("----------------------------------------------------");
+    Serial.println("Task            State   Prio    Stack   Num     Core" );
+    Serial.println("----------------------------------------------------");
+
+    vTaskList(ptrTaskList); //save stats to char array
+    Serial.println(ptrTaskList); //prints out already formatted stats
+    Serial.flush();
+
+    Serial.println("****************************************************");
+    Serial.flush();
 
 }
