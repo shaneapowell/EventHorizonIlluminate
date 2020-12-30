@@ -54,26 +54,8 @@ Command Line Examples:\n\
     echo -e \"off all\\n flash 2 400 1 2\\n on 2 4\\n\" > /dev/ttyACM0     # Turn off all, flash btns 1,2 2x, turn on 2,4\n\
 ";
 
-/* A crossreference lookup, the button ID 1-24, here gets the bit for the shift register.
-Button IDs do not start at 0, but at 1. Hence, the first element is not used */
-static const LED BUTTON_ID_TO_LED_LOOKUP[LED_COUNT+1] = {
-    LED_NULL, /* Not Used */
-    LED_B1, 
-    LED_B2,
-    LED_B3,
-    LED_B4,
-    LED_B5,
-    LED_B6,
-    LED_B7,
-    LED_B8,
-    LED_B9,
-    LED_B10,
-    LED_B11,
-    LED_B12,
-};
-
-
-LED _leds[LED_COUNT] = {LED_NULL};
+/* An array of LEDS identified with the <buttons> param.  For each button, a T/F is placed here */
+bool _leds[LED_COUNT] = {false};
 
 /******************************************************************
  * Returns an uint16 value, with a bit for each ID provided.
@@ -83,11 +65,10 @@ LED _leds[LED_COUNT] = {LED_NULL};
 static void _lightIdToLedArray(int startOffset, cmd* c) 
 {
     /* Null them all out first */
-    memset(_leds, LED_NULL, sizeof(_leds[0]) * LED_COUNT );
+    memset(_leds, false, sizeof(_leds[0]) * LED_COUNT );
 
     Command cmd(c);
     int argCount = cmd.countArgs();
-    int ledIndex = 0;
 
     Argument arg = cmd.getArg(startOffset);
     String argValue = arg.getValue();
@@ -97,7 +78,7 @@ static void _lightIdToLedArray(int startOffset, cmd* c)
     {
         for (int btn = 1; btn <= LED_COUNT; btn++)
         {
-            _leds[btn-1] = BUTTON_ID_TO_LED_LOOKUP[btn];
+            _leds[btn-1] = true;
         }
         return;
     }
@@ -108,14 +89,10 @@ static void _lightIdToLedArray(int startOffset, cmd* c)
     {
         arg = cmd.getArg(argIndex);
         argValue = arg.getValue();
-        LED led = LED_NULL;
-
         int v = argValue.toInt();
         if (v > 0 && v <= LED_COUNT)
         {
-            led = BUTTON_ID_TO_LED_LOOKUP[v];
-            _leds[ledIndex] = led;
-            ledIndex++;
+            _leds[v] = true;
         }
 
     }
@@ -130,10 +107,10 @@ static void _setOn(bool on)
 {
     for (int index = 0; index < LED_COUNT; index++)
     {
-        LED led = _leds[index];
-        if (led != LED_NULL)
+        if (_leds[index])
         {
-            gpioSetLed(led, on);
+            /* Force the index to it's matching enum */
+            gpioSetLed((LED)index, on);
         }
     }
 }

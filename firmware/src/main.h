@@ -64,8 +64,8 @@ typedef enum
 
 typedef enum 
 {
-    LED_NULL = 0,
-    LED_B1 = 1,
+    LED_NULL = -1,
+    LED_B1 = 0,    /* B1 must always be the starting 0 value.  It's force-cased from an int in cmd.cpp. So don't change this. */
     LED_B2,
     LED_B3,
     LED_B4,
