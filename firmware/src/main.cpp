@@ -23,10 +23,11 @@ SOFTWARE.
 ***/
 
 #include <FreeRTOS_SAMD21.h>
-#include "main.h"
 #include "ALHIDJoystick.h"
 #include "ALGpio.h"
 #include "ALCmd.h"
+
+#define PIN_ONBOARD_LED     13
 
 TaskHandle_t handleTaskJoystick;
 TaskHandle_t handleTaskCmd;
@@ -35,12 +36,6 @@ TaskHandle_t handleTaskGpio;
 ALGpio*         _gpio;
 ALHIDJoystick*  _hidJoystick;
 ALCmd*          _cmd;
-
-int _globalGpioSetLed(LED l, bool on)
-{
-    //TODO: Remove when converted to OO
-    return _gpio->setLed(l, on);
-}
 
 /****************************************************************
  * Can use these function for RTOS delays
@@ -78,7 +73,14 @@ static void _threadProcessHidJoystick( void *pvParameters )
  **********************************************/ 
 static void _threadProcessGpio( void *pvParameters )
 {
-    _gpio->process();
+
+    while(true)
+    {
+        _gpio->process();
+        taskYIELD();
+    }
+  
+    vTaskDelete( NULL );
 }
 
 /**********************************************
@@ -86,69 +88,20 @@ static void _threadProcessGpio( void *pvParameters )
  **********************************************/ 
 static void _threadProcessCmd( void *pvParameters )
 {
-    _cmd->process();
-}
-
-/************************************************
- * Setup 
- ************************************************/
-void setup() 
-{
-    Serial.begin(57600);
-    delay(1000);  // prevents usb driver crash on startup, do not omit this
-
-    _gpio = new ALGpio();
-    _hidJoystick = new ALHIDJoystick(_gpio);
-    _cmd = new ALCmd();
-    
-    pinMode(PIN_ONBOARD_LED, OUTPUT);
-
-    vSetErrorLed(PIN_ONBOARD_LED, HIGH);
-    vSetErrorSerial(&Serial);
-
-
-    xTaskCreate(_threadProcessGpio,        "GPIO Task",      256, NULL, tskIDLE_PRIORITY + 1, &handleTaskGpio);
-    xTaskCreate(_threadProcessHidJoystick, "Joystick Task",  256, NULL, tskIDLE_PRIORITY + 1, &handleTaskJoystick);
-    xTaskCreate(_threadProcessCmd,         "Command Task",   384, NULL, tskIDLE_PRIORITY + 1, &handleTaskCmd);
-
-    /* Start the RTOS, this function will never return and will schedule the tasks. */
-    vTaskStartScheduler();
-
-    /* error scheduler failed to start. should never get here */
-    while(1)
+    while (true)
     {
-        Serial.println("Scheduler Failed! \n");
-        Serial.flush();
-        delay(1000);
+        _cmd->process();
+        taskYIELD();
     }
-   
+    vTaskDelete( NULL );
 }
 
-
-/************************************************
- * Main Looper. AKA RTOS Idle State.
- ************************************************/
-void loop() 
-{
-    // Optional commands, can comment/uncomment below
-    delay(100); //delay is interrupt friendly, unlike vNopDelayMS
-    return;
-
-}
-
-
-//*****************************************************************
-// Task will periodically print out useful information about the tasks running
-// Is a useful tool to help figure out stack sizes being used
-// Run time stats are generated from all task timing collected since startup
-// No easy way yet to clear the run time stats yet
-//*****************************************************************
-static char ptrTaskList[400]; //temporary string buffer for task stats
-
+/******************************************************************
+ * Dump to Serial, process stats.
+ ******************************************************************/
 void _dumpProcessMonitor()
 {
-    int x;
-    int measurement;
+    char ptrTaskList[400]; //temporary string buffer for task stats
     
 
     // run this task afew times before exiting forever
@@ -182,5 +135,56 @@ void _dumpProcessMonitor()
 
     Serial.println("****************************************************");
     Serial.flush();
+
+}
+
+
+/************************************************
+ * Setup 
+ ************************************************/
+void setup() 
+{
+    pinMode(PIN_ONBOARD_LED, OUTPUT);
+
+    Serial.begin(57600);
+    delay(1000);  // prevents usb driver crash on startup, do not omit this
+
+    _gpio = new ALGpio();
+    _hidJoystick = new ALHIDJoystick(_gpio);
+    _cmd = new ALCmd(_threadDelayMs,_gpio, _dumpProcessMonitor);
+    
+    _gpio->begin();
+    _hidJoystick->begin();
+
+    vSetErrorLed(PIN_ONBOARD_LED, HIGH);
+    vSetErrorSerial(&Serial);
+
+
+    xTaskCreate(_threadProcessGpio,        "GPIO Task",      256, NULL, tskIDLE_PRIORITY + 1, &handleTaskGpio);
+    xTaskCreate(_threadProcessHidJoystick, "Joystick Task",  256, NULL, tskIDLE_PRIORITY + 1, &handleTaskJoystick);
+    xTaskCreate(_threadProcessCmd,         "Command Task",   384, NULL, tskIDLE_PRIORITY + 1, &handleTaskCmd);
+
+    /* Start the RTOS, this function will never return and will schedule the tasks. */
+    vTaskStartScheduler();
+
+    /* error scheduler failed to start. should never get here */
+    while(1)
+    {
+        Serial.println("Scheduler Failed! \n");
+        Serial.flush();
+        delay(1000);
+    }
+   
+}
+
+
+/************************************************
+ * Main Looper. AKA RTOS Idle State.
+ ************************************************/
+void loop() 
+{
+    // Optional commands, can comment/uncomment below
+    delay(100); //delay is interrupt friendly, unlike vNopDelayMS
+    return;
 
 }

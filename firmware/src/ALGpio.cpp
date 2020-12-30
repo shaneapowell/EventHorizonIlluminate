@@ -22,12 +22,19 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ***/
 
-#include "main.h"
 #include "ALGpio.h"
 #include <FreeRTOS_SAMD21.h>
 #include <Adafruit_MCP23017.h>
 #include <Wire.h>
 
+
+/**************************************************************
+ *
+ *************************************************************/ 
+ALGpio::ALGpio()
+{
+    
+}
 
 /*****************************************************************
  * Get the state of the indicated control. 
@@ -216,7 +223,7 @@ void ALGpio::_setupOutputPin(int pin)
  * joystcick and buttons, checks the states for changes, and writes
  * back the report over the HID.
  *****************************************************************/
-void ALGpio::_gpioSetup()
+void ALGpio::begin()
 {
 
     Wire.setClock(1700000); 
@@ -249,26 +256,17 @@ void ALGpio::_gpioSetup()
 }
 
 /************************************************
- * Thread 
+ * Thread Process stage
  ************************************************/
 void ALGpio::process()
 {
-    _gpioSetup();
+    /* Write Outputs */
+    _mcpA.writeGPIOAB(_mcpOut);
+    _mcpB.writeGPIOAB(_mcpOut >> 16);
 
-    while(true)
-    {
-        /* Write Outputs */
-        _mcpA.writeGPIOAB(_mcpOut);
-        _mcpB.writeGPIOAB(_mcpOut >> 16);
-
-        /* Read Input */
-        uint32_t mcpAIn = _mcpA.readGPIOAB();
-        uint32_t mcpBIn = _mcpB.readGPIOAB();
-        _mcpIn = mcpBIn << 16 | mcpAIn;
-        taskYIELD();
-        
-    }
-  
-    vTaskDelete( NULL );
+    /* Read Input */
+    uint32_t mcpAIn = _mcpA.readGPIOAB();
+    uint32_t mcpBIn = _mcpB.readGPIOAB();
+    _mcpIn = mcpBIn << 16 | mcpAIn;
 
 }

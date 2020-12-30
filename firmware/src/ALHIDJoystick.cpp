@@ -22,9 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ***/
 
-#include "main.h"
 #include "ALHIDJoystick.h"
-#include <FreeRTOS_SAMD21.h>
 #include <HID-Project.h>
 #include <Adafruit_MCP23017.h>
 #include <Wire.h>
@@ -35,7 +33,6 @@ SOFTWARE.
 ALHIDJoystick::ALHIDJoystick(ALGpio* gpio) 
 { 
     _gpio = gpio ;
-    Gamepad.begin();
 }
 
 /***************************************************************
@@ -44,6 +41,14 @@ ALHIDJoystick::ALHIDJoystick(ALGpio* gpio)
 ALHIDJoystick::~ALHIDJoystick()
 {
     Gamepad.end();
+}
+
+/***************************************************************
+ * 
+ ***************************************************************/ 
+void ALHIDJoystick::begin(void)
+{
+    Gamepad.begin();
 }
 
 /****************************************************************

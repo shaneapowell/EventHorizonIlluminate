@@ -28,13 +28,13 @@ SOFTWARE.
     the 4 2-pin inputs hooked directly to MCU pins.
 */
 
-#ifndef __ALGPIO_H__
-#define __ALGPIO_H__
+#pragma once
 
-#include "main.h"
 #include <Adafruit_MCP23017.h>
 #include <Wire.h>
 
+#define BUTTON_COUNT    16
+#define LED_COUNT       12
 
 /* MCP A = pins 0 - 15*/
 #define MCP_PIN_INPUT_UP        0
@@ -59,9 +59,58 @@ SOFTWARE.
 #define MCP_PIN_OUTPUT_B8       24
 #define MCP_PIN_OUTPUT_B9       25
 
+typedef enum
+{
+    JOYSTICK_UP = 0,
+    JOYSTICK_DOWN,
+    JOYSTICK_LEFT,
+    JOYSTICK_RIGHT
+} JOYSTICK;
+
+typedef enum
+{
+    BUTTON_B1 = 0,
+    BUTTON_B2,
+    BUTTON_B3,
+    BUTTON_B4,
+    BUTTON_B5,
+    BUTTON_B6,
+    BUTTON_B7,
+    BUTTON_B8,
+    BUTTON_B9,
+    BUTTON_B10,
+    BUTTON_B11,
+    BUTTON_B12,
+    BUTTON_B13,
+    BUTTON_B14,
+    BUTTON_B15,
+    BUTTON_B16
+} BUTTON;
+
+typedef enum 
+{
+    LED_NULL = -1,
+    LED_B1 = 0,    /* B1 must always be the starting 0 value.  It's force-cased from an int in cmd.cpp. So don't change this. */
+    LED_B2,
+    LED_B3,
+    LED_B4,
+    LED_B5,
+    LED_B6,
+    LED_B7,
+    LED_B8,
+    LED_B9,
+    LED_B10,
+    LED_B11,
+    LED_B12
+} LED;
+
+
+
 class ALGpio
 {
     public:
+        ALGpio();
+        void begin();
         void process();
         bool getJoystick(JOYSTICK j);
         bool getButton(BUTTON b);
@@ -82,8 +131,6 @@ class ALGpio
 
         void _setupInputPin(int pin, bool pullUp);
         void _setupOutputPin(int pin);
-        void _gpioSetup();
   
 };
 
-#endif

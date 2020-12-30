@@ -22,52 +22,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ***/
 
-#include "ALGpio.h"
 
 #pragma once
 
-class ALHIDJoystick
-{
-
-    public:
-        ALHIDJoystick(ALGpio* gpio);
-        ~ALHIDJoystick();
-        void begin(void);
-        void process(void);
-
-    private:
-        typedef struct
-        {
-            bool up;
-            bool down;
-            bool left;
-            bool right;
-            bool btn1;
-            bool btn2;
-            bool btn3;
-            bool btn4;
-            bool btn5;
-            bool btn6;
-            bool btn7;
-            bool btn8;
-            bool btn9;
-            bool btn10;
-            bool btn11;
-            bool btn12;
-            bool btn13;
-            bool btn14;
-            bool btn15;
-            bool btn16;
-        }  CONTROLS_STATE;
-
-        ALGpio *_gpio;
-        CONTROLS_STATE _prevState;
-        CONTROLS_STATE _currState;
-
-        bool _isCurrStateDifferent();
-        void _saveCurrStateToPrevState();
-        void _readCurrentState();
-        void _sendCurrentState();
-
-};
+#define PROGRAM_NAME    "ArcadeIlluminate"
+#define PROGRAM_VERSION "v1.0"
 

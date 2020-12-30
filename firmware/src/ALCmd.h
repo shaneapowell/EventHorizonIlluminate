@@ -24,20 +24,43 @@ SOFTWARE.
 
 #pragma once
 
-#include "main.h"
-#include <FreeRTOS_SAMD21.h>
+#include "ALGpio.h"
 #include <SimpleCLI.h>
-#include <stdint.h>
+#include "const.h"
 
+#define CMD_SERIAL_BUFFER_SIZE 256
+
+typedef void (*fptrDelayMs)(int);
+typedef void (*fptrMonitorDump)();
 
 class ALCmd
 {
     public:
+        ALCmd(fptrDelayMs fptrD, ALGpio* gpio, fptrMonitorDump fptrM);
         void process();
 
+    
     private:
+        fptrDelayMs _fptrDelayMs;
+        ALGpio* _gpio;
+        fptrMonitorDump _fptrMonitorDump;
+
         /* An array of LEDS identified with the <buttons> param.  For each button, a T/F is placed here */
         bool _leds[LED_COUNT] = {false};
+
+        SimpleCLI _cli;
+    
+        Command _cmdOn = _cli.addBoundlessCommand("on");
+        Command _cmdOff = _cli.addBoundlessCommand("off");
+        Command _cmdFlash = _cli.addBoundlessCommand("flash");
+        Command _cmdBootSeq = _cli.addCommand("seq");
+        Command _cmdDump = _cli.addCommand("dump");
+
+        char _serialBuffer[CMD_SERIAL_BUFFER_SIZE];   // an array to store the received data
+        byte _serialBufferIndex = 0;
+        char _serialEndMarker = '\n';
+        char _rc;
+
 
         void _lightIdToLedArray(int startOffset, cmd* c) ;
         void _setOn(bool on);

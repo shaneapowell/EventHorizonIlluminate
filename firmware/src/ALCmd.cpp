@@ -23,10 +23,6 @@ SOFTWARE.
 ***/
 
 #include "ALCmd.h"
-#include <FreeRTOS_SAMD21.h>
-#include <SimpleCLI.h>
-#include <stdint.h>
-
 
 static const char* HELP_TEXT PROGMEM = 
 "\n\
@@ -55,6 +51,15 @@ Command Line Examples:\n\
     echo -e \"off all\\n flash 2 400 1 2\\n on 2 4\\n\" > /dev/ttyACM0     # Turn off all, flash btns 1,2 2x, turn on 2,4\n\
 ";
 
+/******************************************************************
+ * Constructor
+ ******************************************************************/ 
+ALCmd::ALCmd(fptrDelayMs fptrD, ALGpio* gpio, fptrMonitorDump fptrM)
+{ 
+    _fptrDelayMs = fptrD; 
+    _fptrMonitorDump = fptrM;
+    _gpio = gpio;
+}
 
 /******************************************************************
  * Returns an uint16 value, with a bit for each ID provided.
@@ -109,7 +114,7 @@ void ALCmd::_setOn(bool on)
         if (_leds[index])
         {
             /* Force the index to it's matching enum */
-            _globalGpioSetLed((LED)index, on);
+            _gpio->setLed((LED)index, on);
         }
     }
 }
@@ -161,13 +166,13 @@ void ALCmd::_flashCommand(cmd* c)
     int count = cmd.getArg(0).getValue().toInt();
     int interval = cmd.getArg(1).getValue().toInt();
     _lightIdToLedArray(2, c);
-    Serial.print("  -> FLASHING ["); _dumpIdArray(); Serial.println("]");
+    Serial.print("  -> FLASHING "); Serial.print(count); Serial.print("x @"); Serial.print(interval); Serial.print("ms ["); _dumpIdArray(); Serial.println("]");
     while (count > 0)
     {
         _setOn(true);
-        _threadDelayMs(interval);
+        _fptrDelayMs(interval);
         _setOn(false);
-        _threadDelayMs(interval);
+        _fptrDelayMs(interval);
         count--;
     }
 
@@ -186,7 +191,7 @@ void ALCmd::_bootSeqCommand(cmd* c)
 *****************************************************************/
 void ALCmd::_dumpCommand(cmd* c)
 {
-    _dumpProcessMonitor();
+    _fptrMonitorDump();
 }
 
 /*****************************************************************
@@ -196,75 +201,54 @@ void ALCmd::_dumpCommand(cmd* c)
 void ALCmd::process() 
 {
 
-    SimpleCLI _cli;
-    
-    Command _cmdOn = _cli.addBoundlessCommand("on");
-    Command _cmdOff = _cli.addBoundlessCommand("off");
-    Command _cmdFlash = _cli.addBoundlessCommand("flash");
-    Command _cmdBootSeq = _cli.addCommand("seq");
-    Command _cmdDump = _cli.addCommand("dump");
-
-    const byte serialBufferSize = 32;
-    char serialBuffer[serialBufferSize];   // an array to store the received data
-    byte serialBufferIndex = 0;
-    char serialEndMarker = '\n';
-    char rc;
-
-    while(true)
-    {
                 
-        while (Serial.available() > 0) 
+    while (Serial.available() > 0) 
+    {
+        _rc = Serial.read();
+        Serial.write(_rc);
+
+        if (_rc != _serialEndMarker) 
         {
-            rc = Serial.read();
-            Serial.write(rc);
-
-            if (rc != serialEndMarker) 
+            _serialBuffer[_serialBufferIndex] = _rc;
+            _serialBufferIndex++;
+            if (_serialBufferIndex >= SERIAL_BUFFER_SIZE)
             {
-                serialBuffer[serialBufferIndex] = rc;
-                serialBufferIndex++;
-                if (serialBufferIndex >= serialBufferSize)
-                {
-                    serialBufferIndex = serialBufferSize - 1;
-                }
+                _serialBufferIndex = SERIAL_BUFFER_SIZE - 1;
             }
-            else
-            {
-                serialBuffer[serialBufferIndex] = '\0';
-                serialBufferIndex = 0;
-            
-                /* Process the Command */
-                _cli.parse(serialBuffer);
-
-                if (_cli.available())
-                {
-                    Command cmd = _cli.getCmd();
-                    if (cmd == _cmdOn) _onCommand(cmd.getPtr());
-                    if (cmd == _cmdOff) _offCommand(cmd.getPtr());
-                    if (cmd == _cmdFlash) _flashCommand(cmd.getPtr());
-                    if (cmd == _cmdDump) _dumpCommand(cmd.getPtr());
-                }
-
-                /* Output any errors */
-                if (_cli.errored()) 
-                {
-                    Serial.println(_cli.getError().toString());
-                    Serial.println(F("\n-------------------"));
-                    Serial.print(F(PROGRAM_NAME)); Serial.print(F(" (")); Serial.print(F(PROGRAM_VERSION)); Serial.println(")");
-                    Serial.println(HELP_TEXT);
-                }
-
-                Serial.write("\n\n>");
-                memset(serialBuffer, '\0', sizeof(char)*serialBufferSize);
-
-            }
-            
         }
+        else
+        {
+            _serialBuffer[_serialBufferIndex] = '\0';
+            _serialBufferIndex = 0;
+        
+            /* Process the Command */
+            _cli.parse(_serialBuffer);
 
-        taskYIELD();
+            if (_cli.available())
+            {
+                Command cmd = _cli.getCmd();
+                if (cmd == _cmdOn) _onCommand(cmd.getPtr());
+                if (cmd == _cmdOff) _offCommand(cmd.getPtr());
+                if (cmd == _cmdFlash) _flashCommand(cmd.getPtr());
+                if (cmd == _cmdDump) _dumpCommand(cmd.getPtr());
+            }
 
+            /* Output any errors */
+            if (_cli.errored()) 
+            {
+                Serial.println(_cli.getError().toString());
+                Serial.println(F("\n-------------------"));
+                Serial.print(F(PROGRAM_NAME)); Serial.print(F(" (")); Serial.print(F(PROGRAM_VERSION)); Serial.println(")");
+                Serial.println(HELP_TEXT);
+            }
+
+            Serial.write("\n\n>");
+            memset(_serialBuffer, '\0', sizeof(char)*SERIAL_BUFFER_SIZE);
+
+        }
+        
     }
 
-    vTaskDelete( NULL );
 }
 
 
