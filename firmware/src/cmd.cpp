@@ -93,7 +93,7 @@ static void _lightIdToLedArray(int startOffset, cmd* c)
     String argValue = arg.getValue();
 
     /* Watch for the "all" keyword */
-    if (argValue.equals("all"))
+    if (argValue.equalsIgnoreCase("all"))
     {
         for (int btn = 1; btn <= LED_COUNT; btn++)
         {
@@ -108,11 +108,13 @@ static void _lightIdToLedArray(int startOffset, cmd* c)
     {
         arg = cmd.getArg(argIndex);
         argValue = arg.getValue();
+        LED led = LED_NULL;
 
         int v = argValue.toInt();
         if (v > 0 && v <= LED_COUNT)
         {
-            _leds[ledIndex] = BUTTON_ID_TO_LED_LOOKUP[v];
+            led = BUTTON_ID_TO_LED_LOOKUP[v];
+            _leds[ledIndex] = led;
             ledIndex++;
         }
 
@@ -132,7 +134,24 @@ static void _setOn(bool on)
         if (led != LED_NULL)
         {
             gpioSetLed(led, on);
+        }
+    }
+}
 
+/***********************************************************
+ * Simple dump to serial the array of IDs
+ **********************************************************/
+static void _dumpIdArray() 
+{
+    for (int index = 0; index < LED_COUNT; index++)
+    {
+        if (_leds[index] != LED_NULL)
+        {
+            if (index > 0)
+            {
+                Serial.print(" ");
+            }
+            Serial.print(_leds[index]); 
         }
     }
 }
@@ -143,6 +162,7 @@ static void _setOn(bool on)
 static void _onCommand(cmd* c) 
 {
     _lightIdToLedArray(0, c);
+    Serial.print("  -> Turning ON ["); _dumpIdArray(); Serial.println("]");
     _setOn(true);
 }
 
@@ -152,6 +172,7 @@ static void _onCommand(cmd* c)
 static void _offCommand(cmd* c)
 {
     _lightIdToLedArray(0, c);
+    Serial.print("  -> Turning OFF ["); _dumpIdArray(); Serial.println("]");
     _setOn(false);
 }
 
@@ -164,6 +185,7 @@ static void _flashCommand(cmd* c)
     int count = cmd.getArg(0).getValue().toInt();
     int interval = cmd.getArg(1).getValue().toInt();
     _lightIdToLedArray(2, c);
+    Serial.print("  -> FLASHING ["); _dumpIdArray(); Serial.println("]");
     while (count > 0)
     {
         _setOn(true);

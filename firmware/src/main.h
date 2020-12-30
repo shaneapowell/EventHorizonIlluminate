@@ -64,8 +64,8 @@ typedef enum
 
 typedef enum 
 {
-    LED_NULL = -1,
-    LED_B1 = 0,
+    LED_NULL = 0,
+    LED_B1 = 1,
     LED_B2,
     LED_B3,
     LED_B4,
