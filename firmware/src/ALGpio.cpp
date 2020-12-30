@@ -23,58 +23,17 @@ SOFTWARE.
 ***/
 
 #include "main.h"
-
+#include "ALGpio.h"
+#include <FreeRTOS_SAMD21.h>
 #include <Adafruit_MCP23017.h>
 #include <Wire.h>
-
-/* 
-    MCP23017 input for joystick and 12 LED buttons.
-    ULN2003 output for LEDs hooked to dedicated MCU pins.
-    the 4 2-pin inputs hooked directly to MCU pins.
-*/
-
-
-/* MCP A = pins 0 - 15*/
-#define MCP_PIN_INPUT_UP        0
-#define MCP_PIN_INPUT_DOWN      1
-#define MCP_PIN_INPUT_LEFT      2
-#define MCP_PIN_INPUT_RIGHT     3
-#define MCP_PIN_INPUT_B1        4
-#define MCP_PIN_INPUT_B2        5
-#define MCP_PIN_INPUT_B3        6
-#define MCP_PIN_INPUT_B4        7
-#define MCP_PIN_OUTPUT_B1       8
-#define MCP_PIN_OUTPUT_B2       9
-//#define MCP_PIN_INPUT_B7        10
-//#define MCP_PIN_INPUT_B8        11
-//#define MCP_PIN_INPUT_B9        12
-//#define MCP_PIN_INPUT_B10       13
-//#define MCP_PIN_INPUT_B11       14
-//#define MCP_PIN_INPUT_B12       15
-
-/* MCP B = pins 16-31 */
-#define MCP_PIN_INPUT_B13       16
-#define MCP_PIN_OUTPUT_B8       24
-#define MCP_PIN_OUTPUT_B9       25
-
-
-Adafruit_MCP23017 _mcpA;
-Adafruit_MCP23017 _mcpB;
-
-/* 
- * Input and Output BitMasks, made up of a pair of uin16_t that is sent and read from each of the 2 MCUs. 
- *    MCPB       MCPA
- * 31 .... 16 15 .... 0 
-*/
-uint32_t _mcpOut = 0;
-uint32_t _mcpIn  = 0;
 
 
 /*****************************************************************
  * Get the state of the indicated control. 
  * Joystick inputs are OFF=HIGH ON=LOW
  ****************************************************************/
-bool gpioGetJoystick(JOYSTICK j)
+bool ALGpio::getJoystick(JOYSTICK j)
 {
     int bit = 0;
     switch (j)
@@ -102,7 +61,7 @@ bool gpioGetJoystick(JOYSTICK j)
 /*****************************************************************
  * Get the state of the indicated control.  ON=HIGH OFF=LOW
  ****************************************************************/
-bool gpioGetButton(BUTTON b)
+bool ALGpio::getButton(BUTTON b)
 {
     int bit = 0;
     switch (b)
@@ -158,9 +117,10 @@ bool gpioGetButton(BUTTON b)
 
 /*****************************************************************
  * Set the indicated LED to on or off.
- * LOW is on, HIGH if off
+ * LOW is on, HIGH if off.
+ * Returns 1 if sucesfull, 0 if fail.
  *****************************************************************/
-void gpioSetLed(LED l, bool on)
+int ALGpio::setLed(LED l, bool on)
 {
  
     int bit = -1;
@@ -204,14 +164,16 @@ void gpioSetLed(LED l, bool on)
             _mcpOut |= mask;
         }
         
+        return 1;
     }
 
+    return 0;
 }
 
 /***********************************************************
  *
  **********************************************************/
-static void _setupInputPin(int pin, bool pullUp)
+void ALGpio::_setupInputPin(int pin, bool pullUp)
 {
     if (pin <= 15)
     {
@@ -236,7 +198,7 @@ static void _setupInputPin(int pin, bool pullUp)
 /***********************************************************
  *
  **********************************************************/
-static void _setupOutputPin(int pin)
+void ALGpio::_setupOutputPin(int pin)
 {
     if (pin <= 15)
     {
@@ -254,7 +216,7 @@ static void _setupOutputPin(int pin)
  * joystcick and buttons, checks the states for changes, and writes
  * back the report over the HID.
  *****************************************************************/
-static void _gpioSetup()
+void ALGpio::_gpioSetup()
 {
 
     Wire.setClock(1700000); 
@@ -289,7 +251,7 @@ static void _gpioSetup()
 /************************************************
  * Thread 
  ************************************************/
-void _threadProcessGpio( void *pvParameters )
+void ALGpio::process()
 {
     _gpioSetup();
 

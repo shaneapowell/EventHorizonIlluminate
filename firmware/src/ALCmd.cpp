@@ -22,7 +22,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ***/
 
-#include "main.h"
+#include "ALCmd.h"
+#include <FreeRTOS_SAMD21.h>
 #include <SimpleCLI.h>
 #include <stdint.h>
 
@@ -54,15 +55,13 @@ Command Line Examples:\n\
     echo -e \"off all\\n flash 2 400 1 2\\n on 2 4\\n\" > /dev/ttyACM0     # Turn off all, flash btns 1,2 2x, turn on 2,4\n\
 ";
 
-/* An array of LEDS identified with the <buttons> param.  For each button, a T/F is placed here */
-bool _leds[LED_COUNT] = {false};
 
 /******************************************************************
  * Returns an uint16 value, with a bit for each ID provided.
  * The uint16 is 0 indexed, but the IDs provided are mapped from 1.
  * eg.. a led ID of 2 sets bit 1
  *****************************************************************/
-static void _lightIdToLedArray(int startOffset, cmd* c) 
+void ALCmd::_lightIdToLedArray(int startOffset, cmd* c) 
 {
     /* Null them all out first */
     memset(_leds, false, sizeof(_leds[0]) * LED_COUNT );
@@ -103,14 +102,14 @@ static void _lightIdToLedArray(int startOffset, cmd* c)
  * Given the current led array state, turn the indicated
  * LEDs on or off.
 *****************************************************************/
-static void _setOn(bool on) 
+void ALCmd::_setOn(bool on) 
 {
     for (int index = 0; index < LED_COUNT; index++)
     {
         if (_leds[index])
         {
             /* Force the index to it's matching enum */
-            gpioSetLed((LED)index, on);
+            _globalGpioSetLed((LED)index, on);
         }
     }
 }
@@ -118,7 +117,7 @@ static void _setOn(bool on)
 /***********************************************************
  * Simple dump to serial the array of IDs
  **********************************************************/
-static void _dumpIdArray() 
+void ALCmd::_dumpIdArray() 
 {
     for (int index = 0; index < LED_COUNT; index++)
     {
@@ -136,7 +135,7 @@ static void _dumpIdArray()
 /*****************************************************************
  * Respond to the "on" command.
 *****************************************************************/
-static void _onCommand(cmd* c) 
+void ALCmd::_onCommand(cmd* c) 
 {
     _lightIdToLedArray(0, c);
     Serial.print("  -> Turning ON ["); _dumpIdArray(); Serial.println("]");
@@ -146,7 +145,7 @@ static void _onCommand(cmd* c)
 /*****************************************************************
  * Respond to the "off" command.
 *****************************************************************/
-static void _offCommand(cmd* c)
+void ALCmd::_offCommand(cmd* c)
 {
     _lightIdToLedArray(0, c);
     Serial.print("  -> Turning OFF ["); _dumpIdArray(); Serial.println("]");
@@ -156,7 +155,7 @@ static void _offCommand(cmd* c)
 /*****************************************************************
  * Respond to the "flash" command.
 *****************************************************************/
-static void _flashCommand(cmd* c)
+void ALCmd::_flashCommand(cmd* c)
 {
     Command cmd(c);
     int count = cmd.getArg(0).getValue().toInt();
@@ -177,7 +176,7 @@ static void _flashCommand(cmd* c)
 /*****************************************************************
  * respond to the "seq" command.
 *****************************************************************/
-static void _bootSeqCommand(cmd* c)
+void ALCmd::_bootSeqCommand(cmd* c)
 {
     // TODO:
 }
@@ -185,7 +184,7 @@ static void _bootSeqCommand(cmd* c)
 /*****************************************************************
  * respond to the "dump" command.
 *****************************************************************/
-static void _dumpCommand(cmd* c)
+void ALCmd::_dumpCommand(cmd* c)
 {
     _dumpProcessMonitor();
 }
@@ -194,15 +193,16 @@ static void _dumpCommand(cmd* c)
  * Create a thread that process the incomming serial commands,
  * then executes the request.
 *****************************************************************/
-void _threadProcessCmd( void *pvParameters ) 
+void ALCmd::process() 
 {
 
     SimpleCLI _cli;
-    Command _cmdOn = _cli.addBoundlessCommand("on", _onCommand);
-    Command _cmdOff = _cli.addBoundlessCommand("off", _offCommand);
-    Command _cmdFlash = _cli.addBoundlessCommand("flash", _flashCommand);
-    Command _cmdBootSeq = _cli.addBoundlessCommand("seq", _bootSeqCommand);
-    Command _cmdDump = _cli.addCmd("dump", _dumpCommand);
+    
+    Command _cmdOn = _cli.addBoundlessCommand("on");
+    Command _cmdOff = _cli.addBoundlessCommand("off");
+    Command _cmdFlash = _cli.addBoundlessCommand("flash");
+    Command _cmdBootSeq = _cli.addCommand("seq");
+    Command _cmdDump = _cli.addCommand("dump");
 
     const byte serialBufferSize = 32;
     char serialBuffer[serialBufferSize];   // an array to store the received data
@@ -234,6 +234,15 @@ void _threadProcessCmd( void *pvParameters )
             
                 /* Process the Command */
                 _cli.parse(serialBuffer);
+
+                if (_cli.available())
+                {
+                    Command cmd = _cli.getCmd();
+                    if (cmd == _cmdOn) _onCommand(cmd.getPtr());
+                    if (cmd == _cmdOff) _offCommand(cmd.getPtr());
+                    if (cmd == _cmdFlash) _flashCommand(cmd.getPtr());
+                    if (cmd == _cmdDump) _dumpCommand(cmd.getPtr());
+                }
 
                 /* Output any errors */
                 if (_cli.errored()) 

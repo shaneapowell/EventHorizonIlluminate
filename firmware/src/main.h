@@ -22,10 +22,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ***/
 
+
 #ifndef __MAIN_H__
 #define __MAIN_H__
-
-#include <FreeRTOS_SAMD21.h>
 
 #define PROGRAM_NAME    "ArcadeIlluminate"
 #define PROGRAM_VERSION "v1.0"
@@ -82,14 +81,14 @@ typedef enum
 
 void _threadDelayUs(int us);
 void _threadDelayMs(int ms);
-void _threadProcessGpio( void *pvParameters );
-void _threadProcessJoystick( void *pvParameters );
-void _threadProcessCmd( void *pvParameters ); 
-void _threadProcessMonitor(void *pvParameters);
+//void _threadProcessGpio( void *pvParameters );
+//void _threadProcessJoystick( void *pvParameters );
+//void _threadProcessCmd( void *pvParameters ); 
 void _dumpProcessMonitor();
 
-bool gpioGetJoystick(JOYSTICK j);
-bool gpioGetButton(BUTTON b);
-void gpioSetLed(LED l, bool on);
+// bool gpioGetJoystick(JOYSTICK j);
+// bool gpioGetButton(BUTTON b);
+int _globalGpioSetLed(LED l, bool on);
+
 
 #endif

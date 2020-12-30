@@ -22,11 +22,25 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ***/
 
+#include <FreeRTOS_SAMD21.h>
 #include "main.h"
+#include "ALHIDJoystick.h"
+#include "ALGpio.h"
+#include "ALCmd.h"
 
 TaskHandle_t handleTaskJoystick;
 TaskHandle_t handleTaskCmd;
 TaskHandle_t handleTaskGpio;
+
+ALGpio*         _gpio;
+ALHIDJoystick*  _hidJoystick;
+ALCmd*          _cmd;
+
+int _globalGpioSetLed(LED l, bool on)
+{
+    //TODO: Remove when converted to OO
+    return _gpio->setLed(l, on);
+}
 
 /****************************************************************
  * Can use these function for RTOS delays
@@ -43,6 +57,37 @@ void _threadDelayMs(int ms)
     vTaskDelay( ms/ portTICK_PERIOD_MS );  
 }
 
+/**********************************************
+ * Joystick HID Thread
+ **********************************************/ 
+static void _threadProcessHidJoystick( void *pvParameters )
+{
+
+    while(true)
+    {
+        _hidJoystick->process();
+        taskYIELD();
+    }
+  
+    vTaskDelete( NULL );
+
+}
+
+/**********************************************
+ * Hardware GPIO Thread
+ **********************************************/ 
+static void _threadProcessGpio( void *pvParameters )
+{
+    _gpio->process();
+}
+
+/**********************************************
+ * Command Thread
+ **********************************************/ 
+static void _threadProcessCmd( void *pvParameters )
+{
+    _cmd->process();
+}
 
 /************************************************
  * Setup 
@@ -51,6 +96,10 @@ void setup()
 {
     Serial.begin(57600);
     delay(1000);  // prevents usb driver crash on startup, do not omit this
+
+    _gpio = new ALGpio();
+    _hidJoystick = new ALHIDJoystick(_gpio);
+    _cmd = new ALCmd();
     
     pinMode(PIN_ONBOARD_LED, OUTPUT);
 
@@ -58,9 +107,9 @@ void setup()
     vSetErrorSerial(&Serial);
 
 
-    xTaskCreate(_threadProcessGpio,     "GPIO Task",      256, NULL, tskIDLE_PRIORITY + 1, &handleTaskGpio);
-    xTaskCreate(_threadProcessJoystick, "Joystick Task",  256, NULL, tskIDLE_PRIORITY + 1, &handleTaskJoystick);
-    xTaskCreate(_threadProcessCmd,      "Command Task",   384, NULL, tskIDLE_PRIORITY + 1, &handleTaskCmd);
+    xTaskCreate(_threadProcessGpio,        "GPIO Task",      256, NULL, tskIDLE_PRIORITY + 1, &handleTaskGpio);
+    xTaskCreate(_threadProcessHidJoystick, "Joystick Task",  256, NULL, tskIDLE_PRIORITY + 1, &handleTaskJoystick);
+    xTaskCreate(_threadProcessCmd,         "Command Task",   384, NULL, tskIDLE_PRIORITY + 1, &handleTaskCmd);
 
     /* Start the RTOS, this function will never return and will schedule the tasks. */
     vTaskStartScheduler();
