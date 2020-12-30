@@ -45,8 +45,8 @@ class ALCmd
         ALGpio* _gpio;
         fptrMonitorDump _fptrMonitorDump;
 
-        /* An array of LEDS identified with the <buttons> param.  For each button, a T/F is placed here */
-        bool _leds[LED_COUNT] = {false};
+        /* An array of LEDS identified with the <buttons> param. */
+        LED _leds[LED_COUNT] = {LED_NULL};
 
         SimpleCLI _cli;
     

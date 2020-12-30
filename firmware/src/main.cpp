@@ -23,8 +23,9 @@ SOFTWARE.
 ***/
 
 #include <FreeRTOS_SAMD21.h>
+#include <ALGpio.h>
+#include "ALGpioPinSourceImpl.h"
 #include "ALHIDJoystick.h"
-#include "ALGpio.h"
 #include "ALCmd.h"
 
 #define PIN_ONBOARD_LED     13
@@ -42,22 +43,14 @@ ALCmd*          _cmd;
  * Takes into account processor speed
  * Use these instead of delay(...) in rtos tasks
  *****************************************************************/
-void _threadDelayUs(int us)
-{
-    vTaskDelay( us / portTICK_PERIOD_US );  
-}
-
-void _threadDelayMs(int ms)
-{
-    vTaskDelay( ms/ portTICK_PERIOD_MS );  
-}
+void _threadDelayUs(int us) { vTaskDelay( us / portTICK_PERIOD_US ); }
+void _threadDelayMs(int ms) { vTaskDelay( ms/ portTICK_PERIOD_MS );  }
 
 /**********************************************
  * Joystick HID Thread
  **********************************************/ 
 static void _threadProcessHidJoystick( void *pvParameters )
 {
-
     while(true)
     {
         _hidJoystick->process();
@@ -65,7 +58,6 @@ static void _threadProcessHidJoystick( void *pvParameters )
     }
   
     vTaskDelete( NULL );
-
 }
 
 /**********************************************
@@ -73,7 +65,6 @@ static void _threadProcessHidJoystick( void *pvParameters )
  **********************************************/ 
 static void _threadProcessGpio( void *pvParameters )
 {
-
     while(true)
     {
         _gpio->process();
@@ -149,7 +140,8 @@ void setup()
     Serial.begin(57600);
     delay(1000);  // prevents usb driver crash on startup, do not omit this
 
-    _gpio = new ALGpio();
+    ALGpioPinSourceImpl pinSource = ALGpioPinSourceImpl();
+    _gpio = new ALGpio(&pinSource);
     _hidJoystick = new ALHIDJoystick(_gpio);
     _cmd = new ALCmd(_threadDelayMs,_gpio, _dumpProcessMonitor);
     

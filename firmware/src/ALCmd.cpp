@@ -51,6 +51,22 @@ Command Line Examples:\n\
     echo -e \"off all\\n flash 2 400 1 2\\n on 2 4\\n\" > /dev/ttyACM0     # Turn off all, flash btns 1,2 2x, turn on 2,4\n\
 ";
 
+const LED BUTTON_TO_LED_MAP[LED_COUNT+1] {
+    LED_NULL,
+    LED_B1,
+    LED_B2,
+    LED_B3,
+    LED_B4,
+    LED_B5,
+    LED_B6,
+    LED_B7,
+    LED_B8,
+    LED_B9,
+    LED_B10,
+    LED_B11,
+    LED_B12,
+};
+
 /******************************************************************
  * Constructor
  ******************************************************************/ 
@@ -82,7 +98,7 @@ void ALCmd::_lightIdToLedArray(int startOffset, cmd* c)
     {
         for (int btn = 1; btn <= LED_COUNT; btn++)
         {
-            _leds[btn-1] = true;
+            _leds[btn-1] = BUTTON_TO_LED_MAP[btn];
         }
         return;
     }
@@ -96,7 +112,7 @@ void ALCmd::_lightIdToLedArray(int startOffset, cmd* c)
         int v = argValue.toInt();
         if (v > 0 && v <= LED_COUNT)
         {
-            _leds[v] = true;
+            _leds[v] = BUTTON_TO_LED_MAP[v];
         }
 
     }
@@ -111,10 +127,10 @@ void ALCmd::_setOn(bool on)
 {
     for (int index = 0; index < LED_COUNT; index++)
     {
-        if (_leds[index])
+        if (_leds[index] != LED_NULL)
         {
             /* Force the index to it's matching enum */
-            _gpio->setLed((LED)index, on);
+            _gpio->setLed(_leds[index], on);
         }
     }
 }
