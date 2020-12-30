@@ -80,6 +80,7 @@ void _saveCurrStateToPrevState()
 void _readCurrentState()
 {
     memset(&_currState, 0, sizeof(CONTROLS_STATE));
+
     _currState.up    = gpioGetJoystick(JOYSTICK_UP);
     _currState.down  = gpioGetJoystick(JOYSTICK_DOWN);
     _currState.left  = gpioGetJoystick(JOYSTICK_LEFT);
@@ -89,6 +90,19 @@ void _readCurrentState()
     _currState.btn2  = gpioGetButton(BUTTON_B2);
     _currState.btn3  = gpioGetButton(BUTTON_B3);
     _currState.btn4  = gpioGetButton(BUTTON_B4);
+    _currState.btn5  = gpioGetButton(BUTTON_B5);
+    _currState.btn6  = gpioGetButton(BUTTON_B6);
+    _currState.btn7  = gpioGetButton(BUTTON_B7);
+    _currState.btn8  = gpioGetButton(BUTTON_B8);
+    _currState.btn9  = gpioGetButton(BUTTON_B9);
+    _currState.btn10  = gpioGetButton(BUTTON_B10);
+    _currState.btn11  = gpioGetButton(BUTTON_B11);
+    _currState.btn12  = gpioGetButton(BUTTON_B12);
+    _currState.btn13  = gpioGetButton(BUTTON_B13);
+    _currState.btn14  = gpioGetButton(BUTTON_B14);
+    _currState.btn15  = gpioGetButton(BUTTON_B15);
+    _currState.btn16  = gpioGetButton(BUTTON_B16);
+
 }
 
 /****************************************************************

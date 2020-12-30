@@ -33,51 +33,42 @@ SOFTWARE.
     the 4 2-pin inputs hooked directly to MCU pins.
 */
 
-#define MCPA_PIN_INPUT_UP        0
-#define MCPA_PIN_INPUT_DOWN      1
-#define MCPA_PIN_INPUT_LEFT      2
-#define MCPA_PIN_INPUT_RIGHT     3
-#define MCPA_PIN_INPUT_B1        4
-#define MCPA_PIN_INPUT_B2        5
-#define MCPA_PIN_INPUT_B3        6
-#define MCPA_PIN_INPUT_B4        7
-#define MCPA_PIN_INPUT_B5        8
-#define MCPA_PIN_INPUT_B6        9
-#define MCPA_PIN_INPUT_B7        10
-#define MCPA_PIN_INPUT_B8        11
-#define MCPA_PIN_INPUT_B9        12
-#define MCPA_PIN_INPUT_B10       13
-#define MCPA_PIN_INPUT_B11       14
-#define MCPA_PIN_INPUT_B12       15
 
-// #define MCPA_PIN_INPUT_B13_PIN           20
-// #define MCPA_PIN_INPUT_B14_PIN           21
-// #define MCPA_PIN_INPUT_B15_PIN           22
-// #define MCPA_PIN_INPUT_B16_PIN           23
+/* MCP A = pins 0 - 15*/
+#define MCP_PIN_INPUT_UP        0
+#define MCP_PIN_INPUT_DOWN      1
+#define MCP_PIN_INPUT_LEFT      2
+#define MCP_PIN_INPUT_RIGHT     3
+#define MCP_PIN_INPUT_B1        4
+#define MCP_PIN_INPUT_B2        5
+#define MCP_PIN_INPUT_B3        6
+#define MCP_PIN_INPUT_B4        7
+#define MCP_PIN_OUTPUT_B1       8
+#define MCP_PIN_OUTPUT_B2       9
+//#define MCP_PIN_INPUT_B7        10
+//#define MCP_PIN_INPUT_B8        11
+//#define MCP_PIN_INPUT_B9        12
+//#define MCP_PIN_INPUT_B10       13
+//#define MCP_PIN_INPUT_B11       14
+//#define MCP_PIN_INPUT_B12       15
 
-#define MCPA_PIN_OUTPUT_B1           8
-#define MCPA_PIN_OUTPUT_B2           9
-#define MCPA_PIN_OUTPUT_B3           10
-#define MCPA_PIN_OUTPUT_B4           11
-// #define OUTPUT_B3_PIN           24
-// #define OUTPUT_B4_PIN           24
-// #define OUTPUT_B5_PIN           24
-// #define OUTPUT_B6_PIN           24
-// #define OUTPUT_B7_PIN           24
-// #define OUTPUT_B8_PIN           24
-// #define OUTPUT_B9_PIN           24
-// #define OUTPUT_B10_PIN          24
-// #define OUTPUT_B11_PIN          24
-// #define OUTPUT_B12_PIN          24
+/* MCP B = pins 16-31 */
+#define MCP_PIN_INPUT_B13       16
+#define MCP_PIN_OUTPUT_B8       24
+#define MCP_PIN_OUTPUT_B9       25
 
 
 Adafruit_MCP23017 _mcpA;
-//Adafruit_MCP23017 _mcpB;
+Adafruit_MCP23017 _mcpB;
 
-uint16_t _mcpAOut = 0xFF;
-uint16_t _mcpBOut = 0xFF;
-uint16_t _mcpAIn = 0;
-uint16_t _mcpBIn = 0;
+/* 
+ * Input and Output BitMasks, made up of a pair of uin16_t that is sent and read from each of the 2 MCUs. 
+ *    MCPB       MCPA
+ * 31 .... 16 15 .... 0 
+*/
+uint32_t _mcpOut = 0x0;
+uint32_t _mcpIn = 0;
+
 
 /*****************************************************************
  * Get the state of the indicated control. 
@@ -89,20 +80,22 @@ bool gpioGetJoystick(JOYSTICK j)
     switch (j)
     {
         case JOYSTICK_UP:    
-            bit = MCPA_PIN_INPUT_UP;
+            bit = MCP_PIN_INPUT_UP;
             break;
         case JOYSTICK_DOWN:  
-            bit = MCPA_PIN_INPUT_DOWN;
+            bit = MCP_PIN_INPUT_DOWN;
             break;
         case JOYSTICK_LEFT:  
-            bit = MCPA_PIN_INPUT_LEFT;
+            bit = MCP_PIN_INPUT_LEFT;
             break;
         case JOYSTICK_RIGHT: 
-            bit = MCPA_PIN_INPUT_RIGHT;
+            bit = MCP_PIN_INPUT_RIGHT;
             break;
+        default:
+            return false;
     }
 
-    return (_mcpAIn & (1 << bit)) == 0;
+    return (_mcpIn & (1 << bit)) == 0;
 
 }
 
@@ -115,49 +108,51 @@ bool gpioGetButton(BUTTON b)
     switch (b)
     {
         case BUTTON_B1: 
-            bit = MCPA_PIN_INPUT_B1;
+            bit = MCP_PIN_INPUT_B1;
             break;
         case BUTTON_B2: 
-            bit = MCPA_PIN_INPUT_B2;
+            bit = MCP_PIN_INPUT_B2;
             break;
         case BUTTON_B3: 
-            bit = MCPA_PIN_INPUT_B3;
+            bit = MCP_PIN_INPUT_B3;
             break;
         case BUTTON_B4: 
-            bit = MCPA_PIN_INPUT_B4;
+            bit = MCP_PIN_INPUT_B4;
             break;
-        case BUTTON_B5: 
-            bit = MCPA_PIN_INPUT_B5;
+        // case BUTTON_B5: 
+        //     bit = MCP_PIN_INPUT_B5;
+        //     break;
+        // case BUTTON_B6: 
+        //     bit = MCP_PIN_INPUT_B6;
+        //     break;
+        // case BUTTON_B7: 
+        //     bit = MCP_PIN_INPUT_B7;
+        //     break;
+        // case BUTTON_B8: 
+        //     bit = MCP_PIN_INPUT_B8;
+        //     break;
+        // case BUTTON_B9: 
+        //     bit = MCP_PIN_INPUT_B9;
+        //     break;
+        // case BUTTON_B10: 
+        //     bit = MCP_PIN_INPUT_B10;
+        //     break;
+        // case BUTTON_B11: 
+        //     bit = MCP_PIN_INPUT_B11;
+        //     break;
+        // case BUTTON_B12: 
+        //     bit = MCP_PIN_INPUT_B12;
+        //     break;
+        case BUTTON_B13: 
+            bit = MCP_PIN_INPUT_B13;
             break;
-        case BUTTON_B6: 
-            bit = MCPA_PIN_INPUT_B6;
-            break;
-        case BUTTON_B7: 
-            bit = MCPA_PIN_INPUT_B7;
-            break;
-        case BUTTON_B8: 
-            bit = MCPA_PIN_INPUT_B8;
-            break;
-        case BUTTON_B9: 
-            bit = MCPA_PIN_INPUT_B9;
-            break;
-        case BUTTON_B10: 
-            bit = MCPA_PIN_INPUT_B10;
-            break;
-        case BUTTON_B11: 
-            bit = MCPA_PIN_INPUT_B11;
-            break;
-        case BUTTON_B12: 
-            bit = MCPA_PIN_INPUT_B12;
-            break;
-        // case BUTTON_B13: return !_mcp.digitalRead(MCPA_PIN_INPUT_B13);
-        // case BUTTON_B14: return !_mcp.digitalRead(MCPA_PIN_INPUT_B14);
-        // case BUTTON_B15: return !_mcp.digitalRead(MCPA_PIN_INPUT_B15);
-        // case BUTTON_B16: return !_mcp.digitalRead(MCPA_PIN_INPUT_B16);
+
+        default:
+            return false;
 
     }
 
-    return (_mcpAIn & (1 << bit)) > 0;
+    return (_mcpIn & (1 << bit)) > 0;
 
 }
 
@@ -167,38 +162,91 @@ bool gpioGetButton(BUTTON b)
  *****************************************************************/
 void gpioSetLed(LED l, bool on)
 {
+ 
     int bit = -1;
+    
     switch(l) 
     {
         case LED_B1:
-            bit = MCPA_PIN_OUTPUT_B1;
+            bit = MCP_PIN_OUTPUT_B1;
             break;
         case LED_B2:
-            bit = MCPA_PIN_OUTPUT_B2;
+            bit = MCP_PIN_OUTPUT_B2;
             break;
-        case LED_B3:
-            bit = MCPA_PIN_OUTPUT_B3;
+        // case LED_B3:
+        //     bitA = MCP_PIN_OUTPUT_B3;
+        //     break;
+        // case LED_B4:
+        //     bitA = MCP_PIN_OUTPUT_B4;
+        //     break;
+
+        case LED_B8:
+            bit = MCP_PIN_OUTPUT_B8;
             break;
-        case LED_B4:
-            bit = MCPA_PIN_OUTPUT_B4;
+
+        case LED_B9:
+            bit = MCP_PIN_OUTPUT_B9;
             break;
+
     }
+
 
     if (bit > -1) 
     {
-        int mask = (1 << bit);
+        uint32_t mask = (1 << bit);
         if (on) 
         {
             mask = ~mask;
-            _mcpAOut &= mask;
+            _mcpOut &= mask;
         }
         else
         {
-            _mcpAOut |= mask;
+            _mcpOut |= mask;
         }
         
     }
 
+}
+
+/***********************************************************
+ *
+ **********************************************************/
+static void _setupInputPin(int pin, bool pullUp)
+{
+    if (pin <= 15)
+    {
+        _mcpA.pinMode(pin, INPUT);
+        if (pullUp)
+        {
+            _mcpA.pullUp(pin, HIGH);
+        }
+    }
+    else
+    {
+       pin -= 16;
+       _mcpB.pinMode(pin, INPUT);
+        if (pullUp)
+        {
+            _mcpB.pullUp(pin, HIGH);
+        }
+    }
+    
+}
+
+/***********************************************************
+ *
+ **********************************************************/
+static void _setupOutputPin(int pin)
+{
+    if (pin <= 15)
+    {
+        _mcpA.pinMode(pin, OUTPUT);
+    }
+    else
+    {
+       pin -= 16;
+       _mcpB.pinMode(pin, OUTPUT);
+    }
 }
 
 /*****************************************************************
@@ -211,59 +259,36 @@ static void _gpioSetup()
 
     Wire.setClock(1700000); 
     _mcpA.begin(0, &Wire);
-    //_mcpB.begin(0, &Wire);
+    _mcpB.begin(1, &Wire);
 
     /* Joystick. default HIGH, pulled low on switch */
-    _mcpA.pinMode(MCPA_PIN_INPUT_UP,    INPUT);
-    _mcpA.pinMode(MCPA_PIN_INPUT_DOWN,  INPUT);
-    _mcpA.pinMode(MCPA_PIN_INPUT_LEFT,  INPUT);
-    _mcpA.pinMode(MCPA_PIN_INPUT_RIGHT, INPUT);
-    _mcpA.pullUp(MCPA_PIN_INPUT_UP,    HIGH);
-    _mcpA.pullUp(MCPA_PIN_INPUT_DOWN,  HIGH);
-    _mcpA.pullUp(MCPA_PIN_INPUT_LEFT,  HIGH);
-    _mcpA.pullUp(MCPA_PIN_INPUT_RIGHT, HIGH);
+    _setupInputPin(MCP_PIN_INPUT_UP,    true);
+    _setupInputPin(MCP_PIN_INPUT_DOWN,  true);
+    _setupInputPin(MCP_PIN_INPUT_LEFT,  true);
+    _setupInputPin(MCP_PIN_INPUT_RIGHT, true);
 
-    /* Primary 3-pin LED Buttons, default LOW, pulled high on press */
-    _mcpA.pinMode(MCPA_PIN_INPUT_B1, INPUT);
-    _mcpA.pinMode(MCPA_PIN_INPUT_B2, INPUT);
-    _mcpA.pinMode(MCPA_PIN_INPUT_B3, INPUT);
-    _mcpA.pinMode(MCPA_PIN_INPUT_B4, INPUT);
-    // _mcp.pinMode(MCPA_PIN_INPUT_B5, INPUT);
-    // _mcp.pinMode(MCPA_PIN_INPUT_B6, INPUT);
-    // _mcp.pinMode(MCPA_PIN_INPUT_B7, INPUT);
-    // _mcp.pinMode(MCPA_PIN_INPUT_B8, INPUT);
-    // _mcp.pinMode(MCPA_PIN_INPUT_B9, INPUT);
-    // _mcp.pinMode(MCPA_PIN_INPUT_B10, INPUT);
-    // _mcp.pinMode(MCPA_PIN_INPUT_B11, INPUT);
-    // _mcp.pinMode(MCPA_PIN_INPUT_B12, INPUT);
-    // // _mcp.pinMode(MCPA_PIN_INPUT_B13, INPUT);
-    // _mcp.pinMode(MCPA_PIN_INPUT_B14, INPUT);
-    // _mcp.pinMode(MCPA_PIN_INPUT_B15, INPUT);
-    // _mcp.pinMode(MCPA_PIN_INPUT_B16, INPUT);
+    /* Primary 3-pin Buttons, default LOW, pulled high on press, external PullDowns wired */
+    _setupInputPin(MCP_PIN_INPUT_B1, false);
+    _setupInputPin(MCP_PIN_INPUT_B2, false);
+    _setupInputPin(MCP_PIN_INPUT_B3, false);
+    _setupInputPin(MCP_PIN_INPUT_B4, false);
 
-    /* Primary 3-pin LED Buttons, default HIGH, pulled low for LED */
-    _mcpA.pinMode(MCPA_PIN_OUTPUT_B1, OUTPUT);
-    _mcpA.pinMode(MCPA_PIN_OUTPUT_B2, OUTPUT);
-    _mcpA.pinMode(MCPA_PIN_OUTPUT_B3, OUTPUT);
-    _mcpA.pinMode(MCPA_PIN_OUTPUT_B4, OUTPUT);
 
-    // _mcp.pullUp(MCPA_PIN_INPUT_B5, HIGH);
-    // _mcp.pullUp(MCPA_PIN_INPUT_B6, HIGH);
-    // _mcp.pullUp(MCPA_PIN_INPUT_B7, HIGH);
-    // _mcp.pullUp(MCPA_PIN_INPUT_B8, HIGH);
-    // _mcp.pullUp(MCPA_PIN_INPUT_B9, HIGH);
-    // _mcp.pullUp(MCPA_PIN_INPUT_B10, HIGH);
-    // _mcp.pullUp(MCPA_PIN_INPUT_B11, HIGH);
-    // _mcp.pullUp(MCPA_PIN_INPUT_B12, HIGH);
+    /* Primary 3-pin LEDS, default HIGH, pulled low for LED */
+    _setupOutputPin(MCP_PIN_OUTPUT_B1);
+    _setupOutputPin(MCP_PIN_OUTPUT_B2);
+//    _mcpA.pinMode(MCPA_PIN_OUTPUT_B3, OUTPUT);
+//    _mcpA.pinMode(MCPA_PIN_OUTPUT_B4, OUTPUT);
 
-    // pinMode(MCPA_PIN_INPUT_B13_PIN, INPUT_PULLUP);
-    // pinMode(MCPA_PIN_INPUT_B14_PIN, INPUT_PULLUP);
-    // pinMode(MCPA_PIN_INPUT_B15_PIN, INPUT_PULLUP);
-    // pinMode(MCPA_PIN_INPUT_B16_PIN, INPUT_PULLUP);
- 
+    _setupOutputPin(MCP_PIN_OUTPUT_B8);
+    _setupOutputPin(MCP_PIN_OUTPUT_B9);
+
 
 }
 
+/************************************************
+ * Thread 
+ ************************************************/
 void _threadProcessGpio( void *pvParameters )
 {
     _gpioSetup();
@@ -271,12 +296,13 @@ void _threadProcessGpio( void *pvParameters )
     while(true)
     {
         /* Write Outputs */
-        _mcpA.writeGPIOAB(_mcpAOut);
-        //_mcpB.writeGPIOAB(_mcpBOut);
+        _mcpA.writeGPIOAB(_mcpOut);
+        _mcpB.writeGPIOAB(_mcpOut >> 16);
 
         /* Read Input */
-        _mcpAIn = _mcpA.readGPIOAB();
-        
+        uint32_t mcpAIn = _mcpA.readGPIOAB();
+        uint32_t mcpBIn = _mcpB.readGPIOAB();
+        _mcpIn = mcpBIn << 16 | mcpAIn;
         taskYIELD();
         
     }

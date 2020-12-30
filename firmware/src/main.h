@@ -36,7 +36,6 @@ SOFTWARE.
 
 typedef enum
 {
-    JOYSTICK_NULL = -1,
     JOYSTICK_UP = 0,
     JOYSTICK_DOWN,
     JOYSTICK_LEFT,
