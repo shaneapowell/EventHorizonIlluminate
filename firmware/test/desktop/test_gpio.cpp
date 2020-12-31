@@ -1,7 +1,7 @@
 
 
+#include <ArduinoFake.h>
 #include <unity.h>
-#include "fakeit.hpp"
 
 using namespace fakeit;
 
