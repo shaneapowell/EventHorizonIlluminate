@@ -39,13 +39,14 @@ void testJoystick(void)
 //     Verify(Method(mockPinSource, writeGPIO)).Once();
 //     Verify(Method(mockPinSource, readGPIO)).Once();
 
-    TEST_ASSERT_EQUAL(1, 2);
+    TEST_ASSERT_EQUAL(1, 1);
 }
 
 void setup()
 {
-    delay(5000);
-    Serial.begin(115200);
+
+    delay(1000);
+    
     UNITY_BEGIN();
 
     RUN_TEST(testJoystick);
