@@ -26,7 +26,7 @@ SOFTWARE.
 #include <ALGpio.h>
 #include <ALCmd.h>
 #include <ALHIDJoystick.h>
-#include "MCPPinSource.h"
+#include "MCPPinSourceIMPL.h"
 #include <HID-Project.h>
 
 #define PIN_ONBOARD_LED     13
@@ -146,7 +146,7 @@ void setup()
     ALGpioPinSourceImpl pinSource = ALGpioPinSourceImpl();
     _gpio = new ALGpio(&pinSource);
     _hidJoystick = new ALHIDJoystick(_gpio, &Gamepad);
-    _cmd = new ALCmd(PROGRAM_NAME, _threadDelayMs,_gpio, _dumpProcessMonitor);
+    _cmd = new ALCmd(&Serial, PROGRAM_NAME, _threadDelayMs,_gpio, _dumpProcessMonitor);
     
     _gpio->begin();
     _hidJoystick->begin();

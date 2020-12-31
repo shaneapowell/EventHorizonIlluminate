@@ -34,7 +34,7 @@ SOFTWARE.
 
 #include <stdint.h>
 #include <Adafruit_MCP23017.h>
-#include "ALGpio.h"
+#include <ALGpio.h>
 
 /************************************************
  * Wrapper Implementation around the ADAFruit MCP23017 library.
