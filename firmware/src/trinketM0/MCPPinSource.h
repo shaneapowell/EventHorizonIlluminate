@@ -30,6 +30,8 @@ SOFTWARE.
 
 #pragma once
 
+#ifndef UNIT_TEST
+
 #include <stdint.h>
 #include <Adafruit_MCP23017.h>
 #include "ALGpio.h"
@@ -117,3 +119,5 @@ class ALGpioPinSourceImpl: public ALGpioPinSource
         Adafruit_MCP23017 _mcpA;
         Adafruit_MCP23017 _mcpB;
 };
+
+#endif

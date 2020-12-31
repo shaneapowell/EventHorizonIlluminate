@@ -25,8 +25,9 @@ SOFTWARE.
 #include <FreeRTOS_SAMD21.h>
 #include <ALGpio.h>
 #include <ALCmd.h>
-#include "ALGpioPinSourceIMPL.h"
-#include "ALHIDJoystick.h"
+#include <ALHIDJoystick.h>
+#include "MCPPinSource.h"
+#include <HID-Project.h>
 
 #define PIN_ONBOARD_LED     13
 
@@ -144,7 +145,7 @@ void setup()
 
     ALGpioPinSourceImpl pinSource = ALGpioPinSourceImpl();
     _gpio = new ALGpio(&pinSource);
-    _hidJoystick = new ALHIDJoystick(_gpio);
+    _hidJoystick = new ALHIDJoystick(_gpio, &Gamepad);
     _cmd = new ALCmd(PROGRAM_NAME, _threadDelayMs,_gpio, _dumpProcessMonitor);
     
     _gpio->begin();
@@ -182,3 +183,4 @@ void loop()
     return;
 
 }
+
