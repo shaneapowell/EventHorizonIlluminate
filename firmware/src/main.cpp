@@ -24,11 +24,13 @@ SOFTWARE.
 
 #include <FreeRTOS_SAMD21.h>
 #include <ALGpio.h>
-#include "ALGpioPinSourceImpl.h"
+#include <ALCmd.h>
+#include "ALGpioPinSourceIMPL.h"
 #include "ALHIDJoystick.h"
-#include "ALCmd.h"
 
 #define PIN_ONBOARD_LED     13
+
+const char* PROGRAM_NAME  =  "ArcadeIlluminate (v1.0)";
 
 TaskHandle_t handleTaskJoystick;
 TaskHandle_t handleTaskCmd;
@@ -143,7 +145,7 @@ void setup()
     ALGpioPinSourceImpl pinSource = ALGpioPinSourceImpl();
     _gpio = new ALGpio(&pinSource);
     _hidJoystick = new ALHIDJoystick(_gpio);
-    _cmd = new ALCmd(_threadDelayMs,_gpio, _dumpProcessMonitor);
+    _cmd = new ALCmd(PROGRAM_NAME, _threadDelayMs,_gpio, _dumpProcessMonitor);
     
     _gpio->begin();
     _hidJoystick->begin();
