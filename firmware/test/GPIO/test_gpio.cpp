@@ -1,45 +1,44 @@
 
 
+
 #include <gmock/gmock.h>
-#include <gtest/gtest.h>
 #include <unity.h>
+#include <stdio.h>
 
 #include <ALGpio.h>
 
+using ::testing::Return;
+using ::testing::_;
+using ::testing::Mock;
 
-    class MockPinSource : public ALGpioPinSource {
-    public:
-        MOCK_METHOD(void,     begin,           (),                      (override) );
-        MOCK_METHOD(void,     setupInputPin,   (int pin, bool pullUp),  (override) );
-        MOCK_METHOD(void,     setupOutputPin,  (int pin),               (override) );
-        MOCK_METHOD(void,     writeGPIO,       (uint32_t val),          (override) );
-        MOCK_METHOD(uint32_t, readGPIO,        (),                      (override) );
 
+    class MockGpioPinSource: public ALGpioPinSource
+    {
+        public:
+            MOCK_METHOD(void,     begin,         (),                     (override) );
+            MOCK_METHOD(void,     setupInputPin, (int pin, bool pullUp), (override) );
+            MOCK_METHOD(void,     setupOutputPin,(int pin),              (override) );
+            MOCK_METHOD(void,     writeGPIO,     (uint32_t val),         (override) );
+            MOCK_METHOD(uint32_t, readGPIO,      (),                     (override) );
     };
 
-
-    MockPinSource mockPinSource;
-    //Mock<ALGpioPinSource> mockPinSource;
+    MockGpioPinSource mockPinSource;
     ALGpio gpio = ALGpio(&mockPinSource);
 
     void setUp(void)
     {
-        EXPECT_CALL(mockPinSource, begin()).WillRepeatedly(::testing::Return());
-    //    When(Method(mockPinSource, begin)).AlwaysReturn();
-    //    When(Method(mockPinSource, setupInputPin)).AlwaysReturn();
-    //    When(Method(mockPinSource, setupOutputPin)).AlwaysReturn();
-    //    When(Method(mockPinSource, writeGPIO)).AlwaysDo([](uint32_t val){ outVal = val; });
+
     }
 
     void tearDown(void)
     {
-
+        TEST_ASSERT_TRUE(!::testing::Test::HasFailure());
     }
 
     void testGpioEnums(void)
     {
-        TEST_ASSERT_EQUAL(12, LED_COUNT);
-        TEST_ASSERT_EQUAL(16, BUTTON_COUNT);
+//        TEST_ASSERT_EQUAL(12, LED_COUNT);
+//        TEST_ASSERT_EQUAL(16, BUTTON_COUNT);
 
         /* Ensure all values in ALL_BUTTONS are unique */
 
@@ -48,23 +47,39 @@
 
     }
 
-    // void testGpioBegin(void)
-    // {
-    //     /* Given */
-    //     When(Method(mockPinSource, writeGPIO)).AlwaysReturn();
-    //     When(Method(mockPinSource, readGPIO)).AlwaysReturn();
+    void testGpioBegin(void)
+//    TEST(Gpio, Begin)
+    {
+        /* Given */
+        TEST_MESSAGE("A");
+    
+        TEST_MESSAGE("B");
+        EXPECT_CALL(mockPinSource, setupInputPin(_, _)).Times(201);
+        EXPECT_CALL(mockPinSource, begin()).Times(0);
+        // EXPECT_CALL(mockPinSource, setupOutputPin(_)).Times(12);
+        // EXPECT_CALL(mockPinSource, writeGPIO(_)).Times(1);
+        // EXPECT_CALL(mockPinSource, readGPIO()).Times(1);
 
-    //     /* When */
-    //     gpio.begin();
+        /* When */
+        TEST_MESSAGE("c");
+        gpio.begin();
 
-    //     /* Then */
-    //     Verify(Method(mockPinSource, begin));
-    //     Verify(Method(mockPinSource, setupInputPin)).Exactly(20);
-    //     Verify(Method(mockPinSource, setupOutputPin)).Exactly(12);
-    //     Verify(Method(mockPinSource, writeGPIO)).Once();
-    //     Verify(Method(mockPinSource, readGPIO)).Once();
+        /* Then */
+        TEST_MESSAGE("D");
+        int a = Mock::VerifyAndClearExpectations(&mockPinSource);
+        int b = Mock::VerifyAndClear(&mockPinSource);
+        int c = ::testing::Test::HasFailure();
+        char msg[64];
+        sprintf(msg, "[%d][%d][%d]", a, b, c);
+        TEST_MESSAGE(msg);
+        //TEST_ASSERT_EQUAL(1, 2);
 
-    // }
+
+
+        TEST_MESSAGE("E");
+        
+
+    }
 
     // void testGpioProcess()
     // {
@@ -189,37 +204,15 @@
         
     // }
 
-void process()
+
+
+
+void runTests()
 {
-
-    UNITY_BEGIN();
-
-    RUN_TEST(testGpioEnums);
-    // RUN_TEST(testGpioBegin);
+    // RUN_TEST(testGpioEnums);
+    RUN_TEST(testGpioBegin);
     // RUN_TEST(testGpioProcess);
     // RUN_TEST(testGpioSetLed);
     // RUN_TEST(testGpioJoystick);
     // RUN_TEST(testGpioButtons);
-
-    UNITY_END();
 }
-
-#ifdef ARDUINO
-
-#include <Arduino.h>
-void setup()
-{
-    delay(1000);
-    process();
-}
-
-#else
-
-int main(int argc, char **argv) 
-{
-    process();
-    return 0;
-}
-
-#endif
-    
