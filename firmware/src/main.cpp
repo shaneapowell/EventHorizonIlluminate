@@ -146,7 +146,7 @@ void setup()
     ALGpioPinSourceImpl pinSource = ALGpioPinSourceImpl();
     _gpio = new ALGpio(&pinSource);
     _hidJoystick = new ALHIDJoystick(_gpio, &Gamepad);
-    _cmd = new ALCmd(PROGRAM_NAME, _threadDelayMs,_gpio, _dumpProcessMonitor);
+    _cmd = new ALCmd(PROGRAM_NAME, _threadDelayMs, &Serial, _gpio, _dumpProcessMonitor);
     
     pinSource.begin();
     _gpio->begin();
