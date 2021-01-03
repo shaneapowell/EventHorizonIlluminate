@@ -17,21 +17,22 @@ void setup()
 
     UNITY_BEGIN();
     runTests();
+    
     UNITY_END();
 }
 
 #include <Arduino.h>
 void loop() 
 {
-    /* Indicate the tests have all completed */
+    /* Indicate the tests have all completed with a non-stop double-flash of the onboard LED */
     pinMode(13, OUTPUT);
-    digitalWrite(13, HIGH);
-    delay(100);
     digitalWrite(13, LOW);
     delay(100);
     digitalWrite(13, HIGH);
     delay(100);
     digitalWrite(13, LOW);
+    delay(100);
+    digitalWrite(13, HIGH);
     delay(500);
 }
 
@@ -50,6 +51,9 @@ extern "C"
 
 int main(int argc, char **argv) 
 {
+    ::testing::GTEST_FLAG(throw_on_failure) = false;
+    ::testing::InitGoogleMock();
+
     UNITY_BEGIN();
     runTests();
     UNITY_END();

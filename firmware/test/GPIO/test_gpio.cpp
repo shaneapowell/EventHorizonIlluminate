@@ -1,6 +1,3 @@
-
-
-
 #include <gmock/gmock.h>
 #include <unity.h>
 #include <stdio.h>
@@ -9,210 +6,169 @@
 
 using ::testing::Return;
 using ::testing::_;
+using ::testing::SaveArg;
 using ::testing::Mock;
+using ::testing::Expectation;
 
 
-    class MockGpioPinSource: public ALGpioPinSource
-    {
-        public:
-            MOCK_METHOD(void,     begin,         (),                     (override) );
-            MOCK_METHOD(void,     setupInputPin, (int pin, bool pullUp), (override) );
-            MOCK_METHOD(void,     setupOutputPin,(int pin),              (override) );
-            MOCK_METHOD(void,     writeGPIO,     (uint32_t val),         (override) );
-            MOCK_METHOD(uint32_t, readGPIO,      (),                     (override) );
-    };
+class MockGpioPinSource: public ALGpioPinSource
+{
+    public:
+        MOCK_METHOD(void,     begin,         (),                     (override) );
+        MOCK_METHOD(void,     setupInputPin, (int pin, bool pullUp), (override) );
+        MOCK_METHOD(void,     setupOutputPin,(int pin),              (override) );
+        MOCK_METHOD(void,     writeGPIO,     (uint32_t val),         (override) );
+        MOCK_METHOD(uint32_t, readGPIO,      (),                     (override) );
+};
 
-    MockGpioPinSource mockPinSource;
-    ALGpio gpio = ALGpio(&mockPinSource);
+MockGpioPinSource mockPinSource;
+ALGpio gpio = ALGpio(&mockPinSource);
 
-    void setUp(void)
-    {
+void setUp(void)
+{
+}
 
-    }
+void tearDown(void)
+{
+    ::testing::Mock::VerifyAndClearExpectations(&mockPinSource);
+    TEST_ASSERT_TRUE_MESSAGE(!::testing::Test::HasFailure(), "Test Has Failures");
+}
 
-    void tearDown(void)
-    {
-        TEST_ASSERT_TRUE(!::testing::Test::HasFailure());
-    }
+void test_gpio_enums(void)
+{
+    TEST_ASSERT_EQUAL(12, LED_COUNT);
+    TEST_ASSERT_EQUAL(16, BUTTON_COUNT);
 
-    void testGpioEnums(void)
-    {
-//        TEST_ASSERT_EQUAL(12, LED_COUNT);
-//        TEST_ASSERT_EQUAL(16, BUTTON_COUNT);
-
-        /* Ensure all values in ALL_BUTTONS are unique */
+    /* Ensure all values in ALL_BUTTONS are unique */
 
 
-        /* Ensure all values in ALL_LEDS are unique */
+    /* Ensure all values in ALL_LEDS are unique */
 
-    }
+}
 
-    void testGpioBegin(void)
-//    TEST(Gpio, Begin)
-    {
-        /* Given */
-        TEST_MESSAGE("A");
+void test_gpio_begin(void)
+{
+    /* Given */
+    EXPECT_CALL(mockPinSource, setupInputPin(_, _)).Times(20);
+    EXPECT_CALL(mockPinSource, begin()).Times(0);
+    EXPECT_CALL(mockPinSource, setupOutputPin(_)).Times(12);
+    EXPECT_CALL(mockPinSource, writeGPIO(_)).Times(1);
+    EXPECT_CALL(mockPinSource, readGPIO()).Times(1);
+
+    /* When */
+    gpio.begin();
+
+    /* Then */
+
+}
+
+void test_gpio_process()
+{
+    /* Given */
+    Expectation write = EXPECT_CALL(mockPinSource, writeGPIO(_)).Times(1);
+    EXPECT_CALL(mockPinSource, readGPIO()).Times(1).After(write);
     
-        TEST_MESSAGE("B");
-        EXPECT_CALL(mockPinSource, setupInputPin(_, _)).Times(201);
-        EXPECT_CALL(mockPinSource, begin()).Times(0);
-        // EXPECT_CALL(mockPinSource, setupOutputPin(_)).Times(12);
-        // EXPECT_CALL(mockPinSource, writeGPIO(_)).Times(1);
-        // EXPECT_CALL(mockPinSource, readGPIO()).Times(1);
 
-        /* When */
-        TEST_MESSAGE("c");
-        gpio.begin();
+    /* When */
+    gpio.process();
 
-        /* Then */
-        TEST_MESSAGE("D");
-        int a = Mock::VerifyAndClearExpectations(&mockPinSource);
-        int b = Mock::VerifyAndClear(&mockPinSource);
-        int c = ::testing::Test::HasFailure();
-        char msg[64];
-        sprintf(msg, "[%d][%d][%d]", a, b, c);
-        TEST_MESSAGE(msg);
-        //TEST_ASSERT_EQUAL(1, 2);
+}
 
+/*
+ * Leds are set ON by turning off the bit, and OFF by turning on the bit.
+ */
+void test_gpio_setLed(void)
+{
+    /* Given */
+    uint32_t outVal = 0;
+    EXPECT_CALL(mockPinSource, writeGPIO(_)).Times(3).WillRepeatedly(SaveArg<0>(&outVal));
+    EXPECT_CALL(mockPinSource, readGPIO()).Times(3).WillRepeatedly(Return(0));
 
+    gpio.process();
+    uint32_t startingOutVal = outVal;
+    
 
-        TEST_MESSAGE("E");
-        
+    /* When */
+    gpio.setLed(LED_B1, false);
+    gpio.process();
 
-    }
+    /* Then */
+    TEST_ASSERT_NOT_EQUAL(startingOutVal, outVal);
 
-    // void testGpioProcess()
-    // {
-    //     /* Given */
-    //     When(Method(mockPinSource, writeGPIO)).AlwaysReturn();
-    //     When(Method(mockPinSource, readGPIO)).AlwaysReturn();
+    /* Also When */
+    gpio.setLed(LED_B1, true);
+    gpio.process();
 
-    //     /* When */
-    //     gpio.process();
+    /* Also Then */
+    TEST_ASSERT_EQUAL(startingOutVal, outVal);
 
-    //     /* Then write and read */
-    //     Verify(Method(mockPinSource, writeGPIO) + Method(mockPinSource, readGPIO)).Once();
+}
 
-    // }
+/*
+ * Joysticks are pulled LOW when trigered, HIGH when released.
+ */
+void test_gpio_joystick()
+{
+    /* Given */
+    EXPECT_CALL(mockPinSource, writeGPIO(_)).WillRepeatedly(Return());
+    EXPECT_CALL(mockPinSource, readGPIO())
+        .WillOnce(Return(0xffffffff))
+        .WillOnce(Return(0));
+    
+    /* When */
+    gpio.process();
 
-    // /*
-    //  * Leds are set ON by turning off the bit, and OFF by turning on the bit.
-    //  */
-    // void testGpioSetLed(void)
-    // {
-    //     /* Given */
-    //     static uint32_t outVal;
-    //     When(Method(mockPinSource, writeGPIO)).AlwaysDo([](uint32_t val){ outVal = val; });
-    //     When(Method(mockPinSource, readGPIO)).AlwaysReturn();
-    //     gpio.process();
-    //     uint32_t startingOutVal = outVal;
-        
+    /* Then */
+    TEST_ASSERT_EQUAL(false, gpio.getJoystick(JOYSTICK_UP));
+    TEST_ASSERT_EQUAL(false, gpio.getJoystick(JOYSTICK_DOWN));
+    TEST_ASSERT_EQUAL(false, gpio.getJoystick(JOYSTICK_LEFT));
+    TEST_ASSERT_EQUAL(false, gpio.getJoystick(JOYSTICK_RIGHT));
 
-    //     /* When */
-    //     gpio.setLed(LED_B1, false);
-    //     gpio.process();
+    /* Also When */
+    gpio.process();
 
-    //     /* Then */
-    //     Verify(Method(mockPinSource, writeGPIO)).Exactly(2);
-    //     Verify(Method(mockPinSource, readGPIO)).Exactly(2);
-    //     TEST_ASSERT_NOT_EQUAL(startingOutVal, outVal);
-
-    //     /* Also When */
-    //     gpio.setLed(LED_B1, true);
-    //     gpio.process();
-
-    //     /* Also Then */
-    //     Verify(Method(mockPinSource, writeGPIO)).Exactly(3);
-    //     Verify(Method(mockPinSource, readGPIO)).Exactly(3);
-    //     TEST_ASSERT_EQUAL(startingOutVal, outVal);
-
-    // }
-
-    // /*
-    //  * Joysticks are pulled LOW when trigered, HIGH when released.
-    //  */
-    // void testGpioJoystick()
-    // {
-    //     /* Given */
-    //     When(Method(mockPinSource, writeGPIO)).AlwaysReturn();
-    //     When(Method(mockPinSource, readGPIO)).AlwaysReturn(0xFFFFFFFF);
-        
-    //     /* When */
-    //     gpio.process();
-    //     bool up = gpio.getJoystick(JOYSTICK_UP);
-    //     bool down = gpio.getJoystick(JOYSTICK_DOWN);
-    //     bool left = gpio.getJoystick(JOYSTICK_LEFT);
-    //     bool right = gpio.getJoystick(JOYSTICK_RIGHT);
-
-    //     /* Then */
-    //     Verify(Method(mockPinSource, writeGPIO)).Once();
-    //     Verify(Method(mockPinSource, readGPIO)).Once();
-    //     TEST_ASSERT_EQUAL(false, up);
-    //     TEST_ASSERT_EQUAL(false, down);
-    //     TEST_ASSERT_EQUAL(false, left);
-    //     TEST_ASSERT_EQUAL(false, right);
-
-    //     /* Also Given */
-    //     When(Method(mockPinSource, readGPIO)).AlwaysReturn(0);
-
-    //     /* Also When */
-    //     gpio.process();
-    //     up = gpio.getJoystick(JOYSTICK_UP);
-    //     down = gpio.getJoystick(JOYSTICK_DOWN);
-    //     left = gpio.getJoystick(JOYSTICK_LEFT);
-    //     right = gpio.getJoystick(JOYSTICK_RIGHT);
-
-    //     /* Also Then */
-    //     Verify(Method(mockPinSource, writeGPIO)).Twice();
-    //     Verify(Method(mockPinSource, readGPIO)).Twice();
-    //     TEST_ASSERT_EQUAL(true, up);
-    //     TEST_ASSERT_EQUAL(true, down);
-    //     TEST_ASSERT_EQUAL(true, left);
-    //     TEST_ASSERT_EQUAL(true, right);
-    // }
+    /* Also Then */
+    TEST_ASSERT_EQUAL(true, gpio.getJoystick(JOYSTICK_UP));
+    TEST_ASSERT_EQUAL(true, gpio.getJoystick(JOYSTICK_DOWN));
+    TEST_ASSERT_EQUAL(true, gpio.getJoystick(JOYSTICK_LEFT));
+    TEST_ASSERT_EQUAL(true, gpio.getJoystick(JOYSTICK_RIGHT));
+}
 
 
-    // /*
-    //  * Buttons are pulled HIGH when trigered, LOW when released.
-    //  */
-    // void testGpioButtons()
-    // {
-    //     /* Given */
-    //     When(Method(mockPinSource, writeGPIO)).AlwaysReturn();
-    //     When(Method(mockPinSource, readGPIO)).AlwaysReturn(0xFFFFFFFF);
-        
-    //     /* When */
-    //     gpio.process();
-    //     bool b1 = gpio.getButton(BUTTON_B1);
-        
-    //     /* Then */
-    //     Verify(Method(mockPinSource, writeGPIO)).Once();
-    //     Verify(Method(mockPinSource, readGPIO)).Once();
-    //     TEST_ASSERT_EQUAL(true, b1);
+/*
+ * Buttons are pulled HIGH when trigered, LOW when released.
+ */
+void test_gpio_buttons()
+{
+    /* Given */
+    EXPECT_CALL(mockPinSource, writeGPIO(_))
+        .WillOnce(Return())
+        .WillOnce(Return());
+    EXPECT_CALL(mockPinSource, readGPIO())
+        .WillOnce(Return(0xffffffff))
+        .WillOnce(Return(0));
+    
+    /* When */
+    gpio.process();
+    
+    /* Then */
+    TEST_ASSERT_EQUAL(true, gpio.getButton(BUTTON_B1));
 
-    //     /* Also Given */
-    //     When(Method(mockPinSource, readGPIO)).AlwaysReturn(0);
+    /* Also When */
+    gpio.process();
 
-    //     /* Also When */
-    //     gpio.process();
-    //     b1 = gpio.getButton(BUTTON_B1);
-
-    //     /* Also Then */
-    //     Verify(Method(mockPinSource, writeGPIO)).Twice();
-    //     Verify(Method(mockPinSource, readGPIO)).Twice();
-    //     TEST_ASSERT_EQUAL(false, b1);
-        
-    // }
-
-
+    /* Also Then */
+    TEST_ASSERT_EQUAL(false , gpio.getButton(BUTTON_B1));
+    
+}
 
 
 void runTests()
 {
-    // RUN_TEST(testGpioEnums);
-    RUN_TEST(testGpioBegin);
-    // RUN_TEST(testGpioProcess);
-    // RUN_TEST(testGpioSetLed);
-    // RUN_TEST(testGpioJoystick);
-    // RUN_TEST(testGpioButtons);
+    RUN_TEST(test_gpio_enums);
+    RUN_TEST(test_gpio_begin);
+    RUN_TEST(test_gpio_process);
+    RUN_TEST(test_gpio_setLed);
+    RUN_TEST(test_gpio_joystick);
+    RUN_TEST(test_gpio_buttons);
 }
