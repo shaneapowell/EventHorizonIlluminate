@@ -1,5 +1,5 @@
 #include <gmock/gmock.h>
-#include <unity.h>
+#include <gtest/gtest.h>
 #include <stdio.h>
 
 #include <ALGpio.h>
@@ -21,23 +21,11 @@ class MockGpioPinSource: public ALGpioPinSource
         MOCK_METHOD(uint32_t, readGPIO,      (),                     (override) );
 };
 
-MockGpioPinSource mockPinSource;
-ALGpio gpio = ALGpio(&mockPinSource);
 
-void setUp(void)
+TEST(GPIO, all_enums)
 {
-}
-
-void tearDown(void)
-{
-    ::testing::Mock::VerifyAndClearExpectations(&mockPinSource);
-    TEST_ASSERT_TRUE_MESSAGE(!::testing::Test::HasFailure(), "Test Has Failures");
-}
-
-void test_gpio_enums(void)
-{
-    TEST_ASSERT_EQUAL(12, LED_COUNT);
-    TEST_ASSERT_EQUAL(16, BUTTON_COUNT);
+    ASSERT_EQ(12, LED_COUNT);
+    ASSERT_EQ(16, BUTTON_COUNT);
 
     /* Ensure all values in ALL_BUTTONS are unique */
 
@@ -46,9 +34,11 @@ void test_gpio_enums(void)
 
 }
 
-void test_gpio_begin(void)
+TEST(GPIO, gpio_begin)
 {
     /* Given */
+    MockGpioPinSource mockPinSource;
+    ALGpio gpio = ALGpio(&mockPinSource);
     EXPECT_CALL(mockPinSource, setupInputPin(_, _)).Times(20);
     EXPECT_CALL(mockPinSource, begin()).Times(0);
     EXPECT_CALL(mockPinSource, setupOutputPin(_)).Times(12);
@@ -62,9 +52,11 @@ void test_gpio_begin(void)
 
 }
 
-void test_gpio_process()
+TEST(GPIO, process)
 {
     /* Given */
+    MockGpioPinSource mockPinSource;
+    ALGpio gpio = ALGpio(&mockPinSource);
     Expectation write = EXPECT_CALL(mockPinSource, writeGPIO(_)).Times(1);
     EXPECT_CALL(mockPinSource, readGPIO()).Times(1).After(write);
     
@@ -77,9 +69,11 @@ void test_gpio_process()
 /*
  * Leds are set ON by turning off the bit, and OFF by turning on the bit.
  */
-void test_gpio_setLed(void)
+TEST(GPIO, setLed)
 {
     /* Given */
+    MockGpioPinSource mockPinSource;
+    ALGpio gpio = ALGpio(&mockPinSource);
     uint32_t outVal = 0;
     EXPECT_CALL(mockPinSource, writeGPIO(_)).Times(3).WillRepeatedly(SaveArg<0>(&outVal));
     EXPECT_CALL(mockPinSource, readGPIO()).Times(3).WillRepeatedly(Return(0));
@@ -93,23 +87,25 @@ void test_gpio_setLed(void)
     gpio.process();
 
     /* Then */
-    TEST_ASSERT_NOT_EQUAL(startingOutVal, outVal);
+    ASSERT_NE(startingOutVal, outVal);
 
     /* Also When */
     gpio.setLed(LED_B1, true);
     gpio.process();
 
     /* Also Then */
-    TEST_ASSERT_EQUAL(startingOutVal, outVal);
+    ASSERT_EQ(startingOutVal, outVal);
 
 }
 
 /*
  * Joysticks are pulled LOW when trigered, HIGH when released.
  */
-void test_gpio_joystick()
+TEST(GPIO, joystick)
 {
     /* Given */
+    MockGpioPinSource mockPinSource;
+    ALGpio gpio = ALGpio(&mockPinSource);
     EXPECT_CALL(mockPinSource, writeGPIO(_)).WillRepeatedly(Return());
     EXPECT_CALL(mockPinSource, readGPIO())
         .WillOnce(Return(0xffffffff))
@@ -119,28 +115,30 @@ void test_gpio_joystick()
     gpio.process();
 
     /* Then */
-    TEST_ASSERT_EQUAL(false, gpio.getJoystick(JOYSTICK_UP));
-    TEST_ASSERT_EQUAL(false, gpio.getJoystick(JOYSTICK_DOWN));
-    TEST_ASSERT_EQUAL(false, gpio.getJoystick(JOYSTICK_LEFT));
-    TEST_ASSERT_EQUAL(false, gpio.getJoystick(JOYSTICK_RIGHT));
+    ASSERT_FALSE(gpio.getJoystick(JOYSTICK_UP));
+    ASSERT_FALSE(gpio.getJoystick(JOYSTICK_DOWN));
+    ASSERT_FALSE(gpio.getJoystick(JOYSTICK_LEFT));
+    ASSERT_FALSE(gpio.getJoystick(JOYSTICK_RIGHT));
 
     /* Also When */
     gpio.process();
 
     /* Also Then */
-    TEST_ASSERT_EQUAL(true, gpio.getJoystick(JOYSTICK_UP));
-    TEST_ASSERT_EQUAL(true, gpio.getJoystick(JOYSTICK_DOWN));
-    TEST_ASSERT_EQUAL(true, gpio.getJoystick(JOYSTICK_LEFT));
-    TEST_ASSERT_EQUAL(true, gpio.getJoystick(JOYSTICK_RIGHT));
+    ASSERT_TRUE(gpio.getJoystick(JOYSTICK_UP));
+    ASSERT_TRUE(gpio.getJoystick(JOYSTICK_DOWN));
+    ASSERT_TRUE(gpio.getJoystick(JOYSTICK_LEFT));
+    ASSERT_TRUE(gpio.getJoystick(JOYSTICK_RIGHT));
 }
 
 
 /*
  * Buttons are pulled HIGH when trigered, LOW when released.
  */
-void test_gpio_buttons()
+TEST(GPIO, buttons)
 {
     /* Given */
+    MockGpioPinSource mockPinSource;
+    ALGpio gpio = ALGpio(&mockPinSource);
     EXPECT_CALL(mockPinSource, writeGPIO(_))
         .WillOnce(Return())
         .WillOnce(Return());
@@ -152,23 +150,13 @@ void test_gpio_buttons()
     gpio.process();
     
     /* Then */
-    TEST_ASSERT_EQUAL(true, gpio.getButton(BUTTON_B1));
+    ASSERT_TRUE(gpio.getButton(BUTTON_B1));
 
     /* Also When */
     gpio.process();
 
     /* Also Then */
-    TEST_ASSERT_EQUAL(false , gpio.getButton(BUTTON_B1));
+    ASSERT_FALSE(gpio.getButton(BUTTON_B1));
     
 }
 
-
-void runTests()
-{
-    RUN_TEST(test_gpio_enums);
-    RUN_TEST(test_gpio_begin);
-    RUN_TEST(test_gpio_process);
-    RUN_TEST(test_gpio_setLed);
-    RUN_TEST(test_gpio_joystick);
-    RUN_TEST(test_gpio_buttons);
-}

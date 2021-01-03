@@ -24,8 +24,8 @@ SOFTWARE.
 
 #include <FreeRTOS_SAMD21.h>
 #include <ALGpio.h>
-#include <ALCmd.h>
-#include <ALHIDJoystick.h>
+#include <ALCmd.hpp>
+#include <ALHIDJoystick.hpp>
 #include "MCPPinSourceIMPL.h"
 #include <HID-Project.h>
 
@@ -38,7 +38,7 @@ TaskHandle_t handleTaskCmd;
 TaskHandle_t handleTaskGpio;
 
 ALGpio*         _gpio;
-ALHIDJoystick*  _hidJoystick;
+ALHIDJoystick<GamepadAPI>*  _hidJoystick;
 ALCmd*          _cmd;
 
 /****************************************************************
@@ -145,7 +145,7 @@ void setup()
 
     ALGpioPinSourceImpl pinSource = ALGpioPinSourceImpl();
     _gpio = new ALGpio(&pinSource);
-    _hidJoystick = new ALHIDJoystick(_gpio, &Gamepad);
+    _hidJoystick = new ALHIDJoystick<GamepadAPI>(_gpio, &Gamepad);
     _cmd = new ALCmd(PROGRAM_NAME, _threadDelayMs, &Serial, _gpio, _dumpProcessMonitor);
     
     pinSource.begin();
