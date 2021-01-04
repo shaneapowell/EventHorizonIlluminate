@@ -224,7 +224,7 @@ class ALCmd
                 int v = argValue.toInt();
                 if (v > 0 && v <= LED_COUNT)
                 {
-                    _leds[v] = BUTTON_TO_LED_MAP[v];
+                    _leds[v-1] = BUTTON_TO_LED_MAP[v];
                 }
 
             }

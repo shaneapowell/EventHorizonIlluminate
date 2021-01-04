@@ -46,56 +46,15 @@ bool ALGpio::getJoystick(JOYSTICK j)
  ****************************************************************/
 bool ALGpio::getButton(BUTTON b)
 {
-    int bit = 0;
-    switch (b)
+    /* Active Low */
+    if (b == BUTTON_B13 || b == BUTTON_B14 || b == BUTTON_B15 || b == BUTTON_B16)
     {
-        case BUTTON_B1: 
-            bit = PIN_INPUT_B1;
-            break;
-        case BUTTON_B2: 
-            bit = PIN_INPUT_B2;
-            break;
-        case BUTTON_B3: 
-            bit = PIN_INPUT_B3;
-            break;
-        case BUTTON_B4: 
-            bit = PIN_INPUT_B4;
-            break;
-        // case BUTTON_B5: 
-        //     bit = MCP_PIN_INPUT_B5;
-        //     break;
-        // case BUTTON_B6: 
-        //     bit = MCP_PIN_INPUT_B6;
-        //     break;
-        // case BUTTON_B7: 
-        //     bit = MCP_PIN_INPUT_B7;
-        //     break;
-        // case BUTTON_B8: 
-        //     bit = MCP_PIN_INPUT_B8;
-        //     break;
-        // case BUTTON_B9: 
-        //     bit = MCP_PIN_INPUT_B9;
-        //     break;
-        // case BUTTON_B10: 
-        //     bit = MCP_PIN_INPUT_B10;
-        //     break;
-        // case BUTTON_B11: 
-        //     bit = MCP_PIN_INPUT_B11;
-        //     break;
-        // case BUTTON_B12: 
-        //     bit = MCP_PIN_INPUT_B12;
-        //     break;
-        case BUTTON_B13: 
-            bit = PIN_INPUT_B13;
-            break;
-
-        default:
-            return false;
-
+        return (_mcpIn & (1 << b)) == 0;
     }
-
-    return (_mcpIn & (1 << bit)) > 0;
-
+    else /* Active High */
+    {
+        return (_mcpIn & (1 << b)) != 0;
+    }
 }
 
 /*****************************************************************
@@ -140,11 +99,24 @@ void ALGpio::begin()
     _pinSource->setupInputPin(PIN_INPUT_RIGHT, true);
 
     /* Primary 3-pin Buttons, default LOW, pulled high on press, external PullDowns wired */
-    for (int index = 0; index < BUTTON_COUNT; index++)
-    {
-        _pinSource->setupInputPin(ALL_BUTTONS[index], false);
-    }
+    _pinSource->setupInputPin(PIN_INPUT_B1, false);
+    _pinSource->setupInputPin(PIN_INPUT_B2, false);
+    _pinSource->setupInputPin(PIN_INPUT_B3, false);
+    _pinSource->setupInputPin(PIN_INPUT_B4, false);
+    _pinSource->setupInputPin(PIN_INPUT_B5, false);
+    _pinSource->setupInputPin(PIN_INPUT_B6, false);
+    _pinSource->setupInputPin(PIN_INPUT_B7, false);
+    _pinSource->setupInputPin(PIN_INPUT_B8, false);
+    _pinSource->setupInputPin(PIN_INPUT_B9, false);
+    _pinSource->setupInputPin(PIN_INPUT_B10, false);
+    _pinSource->setupInputPin(PIN_INPUT_B11, false);
+    _pinSource->setupInputPin(PIN_INPUT_B12, false);
     
+    /* 2-pin Buttons */
+    _pinSource->setupInputPin(PIN_INPUT_B13, true);
+    _pinSource->setupInputPin(PIN_INPUT_B14, true);
+    _pinSource->setupInputPin(PIN_INPUT_B15, true);
+    _pinSource->setupInputPin(PIN_INPUT_B16, true);
 
     /* Primary 3-pin LEDS, default HIGH, pulled low for LED */
     for (int index = 0; index < LED_COUNT; index++)
@@ -161,6 +133,7 @@ void ALGpio::begin()
 /************************************************
  * Thread Process stage
  ************************************************/
+#include <FreeRTOS_SAMD21.h>
 void ALGpio::process()
 {
     /* Write Outputs */

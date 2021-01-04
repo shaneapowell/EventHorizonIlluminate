@@ -141,7 +141,7 @@ void setup()
     pinMode(PIN_ONBOARD_LED, OUTPUT);
 
     Serial.begin(57600);
-    delay(1000);  // prevents usb driver crash on startup, do not omit this
+    delay(3000);  // prevents usb driver crash on startup, do not omit this
 
     ALGpioPinSourceImpl pinSource = ALGpioPinSourceImpl();
     _gpio = new ALGpio(&pinSource);

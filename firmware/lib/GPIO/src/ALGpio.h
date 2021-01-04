@@ -36,40 +36,76 @@ SOFTWARE.
 #define LED_COUNT       12
 #define JOYSTICK_AXIS_COUNT 4
 
-/* MCP A = pins 0 - 15*/
-#define PIN_INPUT_UP        0
-#define PIN_INPUT_DOWN      1
-#define PIN_INPUT_LEFT      2
-#define PIN_INPUT_RIGHT     3
-#define PIN_INPUT_B1        4
-#define PIN_INPUT_B2        5
-#define PIN_INPUT_B3        6
-#define PIN_INPUT_B4        7
-#define PIN_INPUT_B5        8
-#define PIN_INPUT_B6        9
-#define PIN_INPUT_B7        10
-#define PIN_INPUT_B8        11
-#define PIN_INPUT_B9        12
-#define PIN_INPUT_B10       13
-#define PIN_INPUT_B11       14
-#define PIN_INPUT_B12       15
-#define PIN_INPUT_B13       16
-#define PIN_INPUT_B14       17
-#define PIN_INPUT_B15       18
-#define PIN_INPUT_B16       19
+#define MCPA_PIN_GPA0            0
+#define MCPA_PIN_GPA1            1
+#define MCPA_PIN_GPA2            2
+#define MCPA_PIN_GPA3            3
+#define MCPA_PIN_GPA4            4
+#define MCPA_PIN_GPA5            5
+#define MCPA_PIN_GPA6            6
+#define MCPA_PIN_GPA7            7
+#define MCPA_PIN_GPB0            8
+#define MCPA_PIN_GPB1            9
+#define MCPA_PIN_GPB2            10
+#define MCPA_PIN_GPB3            11
+#define MCPA_PIN_GPB4            12
+#define MCPA_PIN_GPB5            13
+#define MCPA_PIN_GPB6            14
+#define MCPA_PIN_GPB7            15
 
-#define PIN_OUTPUT_B1       20
-#define PIN_OUTPUT_B2       21
-#define PIN_OUTPUT_B3       22
-#define PIN_OUTPUT_B4       23
-#define PIN_OUTPUT_B5       24
-#define PIN_OUTPUT_B6       25
-#define PIN_OUTPUT_B7       26
-#define PIN_OUTPUT_B8       27
-#define PIN_OUTPUT_B9       28
-#define PIN_OUTPUT_B10      29
-#define PIN_OUTPUT_B11      30
-#define PIN_OUTPUT_B12      31
+#define MCPB_PIN_GPA0            16
+#define MCPB_PIN_GPA1            17
+#define MCPB_PIN_GPA2            18
+#define MCPB_PIN_GPA3            19
+#define MCPB_PIN_GPA4            20
+#define MCPB_PIN_GPA5            21
+#define MCPB_PIN_GPA6            22
+#define MCPB_PIN_GPA7            23
+#define MCPB_PIN_GPB0            24
+#define MCPB_PIN_GPB1            25
+#define MCPB_PIN_GPB2            26
+#define MCPB_PIN_GPB3            27
+#define MCPB_PIN_GPB4            28
+#define MCPB_PIN_GPB5            29
+#define MCPB_PIN_GPB6            30
+#define MCPB_PIN_GPB7            31
+
+/* MCP A = pins 0 - 15*/
+#define PIN_INPUT_B1        MCPA_PIN_GPA0
+#define PIN_INPUT_B2        MCPA_PIN_GPA2
+#define PIN_INPUT_B3        MCPA_PIN_GPA4
+#define PIN_INPUT_B4        MCPA_PIN_GPA6
+#define PIN_INPUT_B5        MCPA_PIN_GPB0
+#define PIN_INPUT_B6        MCPA_PIN_GPB2
+#define PIN_INPUT_B7        MCPA_PIN_GPB4
+#define PIN_INPUT_B8        MCPA_PIN_GPB6
+#define PIN_INPUT_B9        MCPB_PIN_GPA0
+#define PIN_INPUT_B10       MCPB_PIN_GPA2
+#define PIN_INPUT_B11       MCPB_PIN_GPA4
+#define PIN_INPUT_B12       MCPB_PIN_GPA6
+#define PIN_INPUT_B13       MCPB_PIN_GPB7
+#define PIN_INPUT_B14       MCPB_PIN_GPB6
+#define PIN_INPUT_B15       MCPB_PIN_GPB5
+#define PIN_INPUT_B16       MCPB_PIN_GPB4
+
+#define PIN_INPUT_UP        MCPB_PIN_GPB0
+#define PIN_INPUT_DOWN      MCPB_PIN_GPB1
+#define PIN_INPUT_LEFT      MCPB_PIN_GPB3
+#define PIN_INPUT_RIGHT     MCPB_PIN_GPB2
+
+#define PIN_OUTPUT_B1       MCPA_PIN_GPA1
+#define PIN_OUTPUT_B2       MCPA_PIN_GPA3
+#define PIN_OUTPUT_B3       MCPA_PIN_GPA5
+#define PIN_OUTPUT_B4       MCPA_PIN_GPA7
+#define PIN_OUTPUT_B5       MCPA_PIN_GPB1
+#define PIN_OUTPUT_B6       MCPA_PIN_GPB3
+#define PIN_OUTPUT_B7       MCPA_PIN_GPB5
+#define PIN_OUTPUT_B8       MCPA_PIN_GPB7
+#define PIN_OUTPUT_B9       MCPB_PIN_GPA1
+#define PIN_OUTPUT_B10      MCPB_PIN_GPA3
+#define PIN_OUTPUT_B11      MCPB_PIN_GPA5
+#define PIN_OUTPUT_B12      MCPB_PIN_GPA7
+
 
 typedef enum
 {

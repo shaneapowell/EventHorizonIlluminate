@@ -30,8 +30,6 @@ SOFTWARE.
 
 #pragma once
 
-#ifndef UNIT_TEST
-
 #include <stdint.h>
 #include <Adafruit_MCP23017.h>
 #include <ALGpio.h>
@@ -49,6 +47,7 @@ class ALGpioPinSourceImpl: public ALGpioPinSource
          **************************************************/
         void begin()
         {
+//return;
             Wire.setClock(1700000); 
             _mcpA.begin(0, &Wire);
             _mcpB.begin(1, &Wire);
@@ -59,6 +58,7 @@ class ALGpioPinSourceImpl: public ALGpioPinSource
          **************************************************/
         void setupInputPin(int pin, bool pullUp)
         {
+//return;
             if (pin <= 15)
             {
                 _mcpA.pinMode(pin, INPUT);
@@ -76,6 +76,7 @@ class ALGpioPinSourceImpl: public ALGpioPinSource
                     _mcpB.pullUp(pin, HIGH);
                 }
             }
+
         }
 
         /**************************************************
@@ -83,6 +84,7 @@ class ALGpioPinSourceImpl: public ALGpioPinSource
          **************************************************/
         void setupOutputPin(int pin)
         {
+//return;
             if (pin <= 15)
             {
                 _mcpA.pinMode(pin, OUTPUT);
@@ -100,6 +102,7 @@ class ALGpioPinSourceImpl: public ALGpioPinSource
          **************************************************/
         void writeGPIO(uint32_t val)
         {
+//return;
             _mcpA.writeGPIOAB(val);
             _mcpB.writeGPIOAB(val >> 16);
         }
@@ -109,6 +112,7 @@ class ALGpioPinSourceImpl: public ALGpioPinSource
          **************************************************/
         uint32_t readGPIO()
         {
+//return 0;
             uint32_t mcpAIn = _mcpA.readGPIOAB();
             uint32_t mcpBIn = _mcpB.readGPIOAB();
             return mcpBIn << 16 | mcpAIn;
@@ -120,4 +124,3 @@ class ALGpioPinSourceImpl: public ALGpioPinSource
         Adafruit_MCP23017 _mcpB;
 };
 
-#endif
