@@ -175,7 +175,8 @@ class ALGpio
         virtual void process();
         virtual bool getJoystick(JOYSTICK j);
         virtual bool getButton(BUTTON b);
-        virtual int setLed(LED l, bool on);
+        virtual void setLed(LED l, bool on);
+        virtual bool getLed(LED l);
 
     private:
         ALGpioPinSource* _pinSource;

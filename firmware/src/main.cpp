@@ -57,7 +57,7 @@ static void _threadProcessHidJoystick( void *pvParameters )
     while(true)
     {
         _hidJoystick->process();
-        taskYIELD();
+        _threadDelayMs(1); 
     }
   
     vTaskDelete( NULL );
@@ -71,7 +71,8 @@ static void _threadProcessGpio( void *pvParameters )
     while(true)
     {
         _gpio->process();
-        taskYIELD();
+        /* approx <1ms to process + 4ms delay = 200x per second. Should be fast enough I think, and even do a bit of a debounce */
+        _threadDelayMs(4); 
     }
   
     vTaskDelete( NULL );
@@ -85,7 +86,7 @@ static void _threadProcessCmd( void *pvParameters )
     while (true)
     {
         _cmd->process();
-        taskYIELD();
+        _threadDelayMs(10);
     }
     vTaskDelete( NULL );
 }

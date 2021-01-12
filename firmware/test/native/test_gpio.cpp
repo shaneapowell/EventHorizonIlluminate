@@ -98,6 +98,28 @@ TEST(GPIO, setLed)
 
 }
 
+ /*
+  * Leds are set ON by turning off the bit, and OFF by turning on the bit.
+  */
+TEST(GPIO, getLed)
+{
+    /* Given */
+    MockGpioPinSource mockPinSource;
+    ALGpio gpio = ALGpio(&mockPinSource);
+    uint32_t outVal = 0;
+    EXPECT_CALL(mockPinSource, writeGPIO(_)).Times(3).WillRepeatedly(Return());
+    EXPECT_CALL(mockPinSource, readGPIO()).Times(3).WillRepeatedly(Return(outVal));
+
+
+    /* When */
+    bool isOn = gpio.getLed(LED_B1);
+    gpio.process();
+
+    /* Then */
+    ASSERT_TRUE(isOn);
+
+}
+
 /*
  * Joysticks are pulled LOW when trigered, HIGH when released.
  */

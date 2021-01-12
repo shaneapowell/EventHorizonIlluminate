@@ -37,7 +37,7 @@ Commands:\n\
   on     <buttons>                       - Turn on the indicated LEDs.\n\
   off    <buttons>                       - Turn off the indicated LEDs.\n\
   flash  <count> <interval> <buttons>    - Flash the LEDs <count> times.\n\
-  seq                                    - Run the boot animation sequence.\n\
+  bootseq                                - Run the boot animation sequence.\n\
   dump                                   - Print system process info.\n\
   help                                   - Print this help\n\
 \n\
@@ -61,22 +61,6 @@ Command Line Examples:\n\
 #define FLASH_INTERVAL_MIN  10
 #define FLASH_INTERVAL_MAX  2000
 
-const LED BUTTON_TO_LED_MAP[LED_COUNT+1] {
-    LED_NULL,
-    LED_B1,
-    LED_B2,
-    LED_B3,
-    LED_B4,
-    LED_B5,
-    LED_B6,
-    LED_B7,
-    LED_B8,
-    LED_B9,
-    LED_B10,
-    LED_B11,
-    LED_B12,
-};
-
 
 typedef void (*fptrDelayMs)(int);
 typedef void (*fptrMonitorDump)();
@@ -98,11 +82,12 @@ class ALCmd
             _cmdOn = _cli.addBoundlessCommand("on");
             _cmdOff = _cli.addBoundlessCommand("off");
             _cmdFlash = _cli.addBoundlessCommand("flash");
-            _cmdBootSeq = _cli.addCommand("seq");
+            _cmdBootSeq = _cli.addCommand("bootseq");
             _cmdDump = _cli.addCommand("dump");
             _cmdHelp = _cli.addCommand("help");
 
         }
+
 
         /*****************************************************************
          * Create a thread that process the incomming serial commands,
@@ -111,7 +96,14 @@ class ALCmd
         void process() 
         {
 
+            /* First time by default, we run up the boot sequence */
+            if (!_isFinishedBootSeq)
+            {
+                _bootSeqCommand(NULL);
+            }
+            _isFinishedBootSeq = true;
                         
+            /* Process the serial commands */
             while (_serial->available() > 0) 
             {
                 _rc = _serial->read();
@@ -140,6 +132,7 @@ class ALCmd
                         if (cmd == _cmdOn) _onCommand(cmd.getPtr());
                         if (cmd == _cmdOff) _offCommand(cmd.getPtr());
                         if (cmd == _cmdFlash) _flashCommand(cmd.getPtr());
+                        if (cmd == _cmdBootSeq) _bootSeqCommand(cmd.getPtr());
                         if (cmd == _cmdDump) _fptrMonitorDump();
                         if (cmd == _cmdHelp) _helpCommand();
                         
@@ -165,14 +158,12 @@ class ALCmd
 
     
     private:
+        bool _isFinishedBootSeq = false;
         fptrDelayMs _fptrDelayMs;
         Serial_* _serial;
         ALGpio* _gpio;
         const char* _progName;
         fptrMonitorDump _fptrMonitorDump;
-
-        /* An array of LEDS identified with the <buttons> param. */
-        LED _leds[LED_COUNT] = {LED_NULL};
 
         SimpleCLI _cli;
     
@@ -194,11 +185,10 @@ class ALCmd
          * The uint16 is 0 indexed, but the IDs provided are mapped from 1.
          * eg.. a led ID of 2 sets bit 1
          *****************************************************************/
-        void _lightIdToLedArray(int startOffset, cmd* c) 
+        uint16_t _buttonIdToLedMask(int startOffset, cmd* c) 
         {
-            /* Null them all out first */
-            memset(_leds, false, sizeof(_leds[0]) * LED_COUNT );
 
+            uint16_t ledMask = 0;
             Command cmd(c);
             int argCount = cmd.countArgs();
 
@@ -208,11 +198,7 @@ class ALCmd
             /* Watch for the "all" keyword */
             if (argValue.equalsIgnoreCase("all"))
             {
-                for (int btn = 1; btn <= LED_COUNT; btn++)
-                {
-                    _leds[btn-1] = BUTTON_TO_LED_MAP[btn];
-                }
-                return;
+                return 0xFFFFFF;
             }
 
 
@@ -221,61 +207,44 @@ class ALCmd
             {
                 arg = cmd.getArg(argIndex);
                 argValue = arg.getValue();
-                int v = argValue.toInt();
-                if (v > 0 && v <= LED_COUNT)
+                int button = argValue.toInt();
+                if (button > 0 && button <= LED_COUNT)
                 {
-                    _leds[v-1] = BUTTON_TO_LED_MAP[v];
+                    ledMask = ledMask | (1 << (button-1));
                 }
 
             }
+            
+            return ledMask;
             
         }
 
 
         /*****************************************************************
-         * Given the current led array state, turn the indicated
-         * LEDs on or off.
+         * Given an LED bitmask that indicates which LEDs to alter, and
+         * a value to alter those LEDs to.. well.. do just that.
         *****************************************************************/
-        void _setOn(bool on) 
+        void _sendLedState(uint16_t ledMask, bool on) 
         {
             for (int index = 0; index < LED_COUNT; index++)
             {
-                if (_leds[index] != LED_NULL)
+                if (ledMask & (1 << index))
                 {
-                    /* Force the index to it's matching enum */
-                    _gpio->setLed(_leds[index], on);
+                    _gpio->setLed(ALL_LEDS[index], on);
                 }
             }
         }
 
         
-        /***********************************************************
-         * Simple dump to serial the array of IDs
-         **********************************************************/
-        void _dumpIdArray() 
-        {
-            for (int index = 0; index < LED_COUNT; index++)
-            {
-                if (_leds[index] != LED_NULL)
-                {
-                    if (index > 0)
-                    {
-                        _serial->print(" ");
-                    }
-                    _serial->print(_leds[index]); 
-                }
-            }
-        }
-
         
         /*****************************************************************
          * Respond to the "on" command.
         *****************************************************************/
         void _onCommand(cmd* c) 
         {
-            _lightIdToLedArray(0, c);
-            _serial->print("  -> Turning ON ["); _dumpIdArray(); _serial->println("]");
-            _setOn(true);
+            uint16_t ledMask = _buttonIdToLedMask(0, c);
+            _serial->print("  -> Turning ON ["); _serial->print(ledMask, BIN); _serial->println("]");
+            _sendLedState(ledMask, true);
         }
 
 
@@ -284,9 +253,9 @@ class ALCmd
         *****************************************************************/
         void _offCommand(cmd* c)
         {
-            _lightIdToLedArray(0, c);
-            _serial->print("  -> Turning OFF ["); _dumpIdArray(); _serial->println("]");
-            _setOn(false);
+            uint16_t ledMask = _buttonIdToLedMask(0, c);
+            _serial->print("  -> Turning OFF ["); _serial->print(ledMask, BIN); _serial->println("]");
+            _sendLedState(ledMask, false);
         }
 
 
@@ -302,13 +271,13 @@ class ALCmd
             count = max(count, FLASH_COUNT_MIN);
             interval = min(interval, FLASH_INTERVAL_MAX);
             interval = max(interval, FLASH_INTERVAL_MIN);
-            _lightIdToLedArray(2, c);
-            _serial->print("  -> FLASHING "); _serial->print(count); _serial->print("x @"); _serial->print(interval); _serial->print("ms ["); _dumpIdArray(); _serial->println("]");
+            uint16_t ledMask = _buttonIdToLedMask(2, c);
+            _serial->print("  -> FLASHING "); _serial->print(count); _serial->print("x @"); _serial->print(interval); _serial->print("ms ["); _serial->print(ledMask, BIN); _serial->println("]");
             while (count > 0)
             {
-                _setOn(true);
+                _sendLedState(ledMask, true);
                 _fptrDelayMs(interval);
-                _setOn(false);
+                _sendLedState(ledMask, false);
                 _fptrDelayMs(interval);
                 count--;
             }
@@ -317,11 +286,31 @@ class ALCmd
 
 
         /*****************************************************************
-         * respond to the "seq" command.
+         * respond to the "bootseq" command. Just a quick set of 2 animated
+         * on-off-on-off up the LEDs.
         *****************************************************************/
         void _bootSeqCommand(cmd* c)
         {
-            // TODO:
+            _serial->println("  -> Boot Sequence");
+            
+            /* Start Off */
+            uint16_t ledMask = 0xFFFF;
+            _sendLedState(ledMask, false);
+
+            for (int stage = 0; stage < 2; stage++)
+            {
+                for (int onoff = 0; onoff < 2; onoff++)
+                {
+                    ledMask = 1;
+                    for (int index = 0; index < LED_COUNT; index++)
+                    {
+                        _sendLedState(ledMask, onoff % 2 == 0);
+                        _fptrDelayMs(30);
+                        ledMask = (ledMask << 1) | 1;
+                    }
+                }
+            }
+
         }
 
 

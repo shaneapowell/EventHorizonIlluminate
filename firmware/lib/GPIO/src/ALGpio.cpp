@@ -62,11 +62,11 @@ bool ALGpio::getButton(BUTTON b)
  * LOW is on, HIGH if off.
  * Returns 1 if sucesfull, 0 if fail.
  *****************************************************************/
-int ALGpio::setLed(LED l, bool on)
+void ALGpio::setLed(LED l, bool on)
 {
     if (l == LED_NULL)
     {
-        return 0;
+        return;
     }
  
     uint32_t mask = (1 << l);
@@ -80,8 +80,15 @@ int ALGpio::setLed(LED l, bool on)
         _mcpOut |= mask;
     }
     
-    return 1;
-    
+}
+
+/*****************************************************************
+ * Get the current indicated state of the LED
+ *****************************************************************/
+bool ALGpio::getLed(LED l)
+{
+    uint32_t mask = (1 << l);
+    return (_mcpOut & mask) != 0;
 }
 
 /*****************************************************************
