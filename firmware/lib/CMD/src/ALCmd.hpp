@@ -52,15 +52,15 @@ Examples:\n\
     >off 1 4 12              # turn off 1 4 and 12\n\
 \n\
 Command Line Examples:\n\
-    echo -e \"off all\\n flash 3 150 1 2\\n on 1 2\\n\" > /dev/ttyACM0     # Turn off all, flash btns 1,2 3x, turn on 1,2\n\
-    echo -e \"off all\\n flash 2 400 1 2\\n on 2 4\\n\" > /dev/ttyACM0     # Turn off all, flash btns 1,2 2x, turn on 2,4\n\
+    echo \"off all; flash 3 150 1 2; on 1 2;\" > /dev/ttyACM0     # Turn off all, flash btns 1,2 3x, turn on 1,2\n\
+    echo \"off all; flash 2 400 1 2; on 2 4;\" > /dev/ttyACM0     # Turn off all, flash btns 1,2 2x, turn on 2,4\n\
 ";
 
 #define FLASH_COUNT_MIN     1
 #define FLASH_COUNT_MAX     20
 #define FLASH_INTERVAL_MIN  10
 #define FLASH_INTERVAL_MAX  2000
-
+#define ALL_LED_MASK 0xFFFF
 
 typedef void (*fptrDelayMs)(int);
 typedef void (*fptrMonitorDump)();
@@ -96,7 +96,7 @@ class ALCmd
         void process() 
         {
 
-            /* First time by default, we run up the boot sequence */
+            /* First time by default, we run up the boot sequence, and turn them all on. */
             if (!_isFinishedBootSeq)
             {
                 _bootSeqCommand(NULL);
@@ -109,7 +109,7 @@ class ALCmd
                 _rc = _serial->read();
                 _serial->write(_rc);
 
-                if (_rc != _serialEndMarker) 
+                if (_rc != _serialEndMarker1 && _rc != _serialEndMarker2) 
                 {
                     _serialBuffer[_serialBufferIndex] = _rc;
                     _serialBufferIndex++;
@@ -176,7 +176,8 @@ class ALCmd
 
         char _serialBuffer[CMD_SERIAL_BUFFER_SIZE];   // an array to store the received data
         byte _serialBufferIndex = 0;
-        char _serialEndMarker = '\n';
+        char _serialEndMarker1 = '\n';
+        char _serialEndMarker2 = ';';
         char _rc;
 
 
@@ -198,7 +199,7 @@ class ALCmd
             /* Watch for the "all" keyword */
             if (argValue.equalsIgnoreCase("all"))
             {
-                return 0xFFFFFF;
+                return ALL_LED_MASK;
             }
 
 
@@ -214,7 +215,7 @@ class ALCmd
                 }
 
             }
-            
+
             return ledMask;
             
         }
@@ -273,6 +274,10 @@ class ALCmd
             interval = max(interval, FLASH_INTERVAL_MIN);
             uint16_t ledMask = _buttonIdToLedMask(2, c);
             _serial->print("  -> FLASHING "); _serial->print(count); _serial->print("x @"); _serial->print(interval); _serial->print("ms ["); _serial->print(ledMask, BIN); _serial->println("]");
+
+            _sendLedState(ledMask, false);
+            _fptrDelayMs(interval);
+
             while (count > 0)
             {
                 _sendLedState(ledMask, true);
@@ -294,20 +299,18 @@ class ALCmd
             _serial->println("  -> Boot Sequence");
             
             /* Start Off */
-            uint16_t ledMask = 0xFFFF;
-            _sendLedState(ledMask, false);
+            uint16_t ledMask = ALL_LED_MASK;
+            _sendLedState(ledMask, true);
 
-            for (int stage = 0; stage < 2; stage++)
+            /* off -> on -> off -> on */
+            for (int onoff = 0; onoff < 4; onoff++)
             {
-                for (int onoff = 0; onoff < 2; onoff++)
+                ledMask = 1;
+                for (int index = 0; index < LED_COUNT; index++)
                 {
-                    ledMask = 1;
-                    for (int index = 0; index < LED_COUNT; index++)
-                    {
-                        _sendLedState(ledMask, onoff % 2 == 0);
-                        _fptrDelayMs(30);
-                        ledMask = (ledMask << 1) | 1;
-                    }
+                    _sendLedState(ledMask, onoff % 2 != 0);
+                    _fptrDelayMs(20);
+                    ledMask = (ledMask << 1) | 1;
                 }
             }
 

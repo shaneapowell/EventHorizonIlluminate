@@ -35,6 +35,7 @@ SOFTWARE.
 #define BUTTON_COUNT    16
 #define LED_COUNT       12
 #define JOYSTICK_AXIS_COUNT 4
+#define MILLIS_NO_INPUT_SLEEP  (1000 * 10)
 
 #define MCPA_PIN_GPA0            0
 #define MCPA_PIN_GPA1            1
@@ -172,7 +173,7 @@ class ALGpio
     public:
         ALGpio(ALGpioPinSource* p);
         virtual void begin();
-        virtual void process();
+        virtual void process(int msSinceLastProcess);
         virtual bool getJoystick(JOYSTICK j);
         virtual bool getButton(BUTTON b);
         virtual void setLed(LED l, bool on);
@@ -188,9 +189,11 @@ class ALGpio
         uint32_t _mcpOut = 0;
         uint32_t _mcpIn  = 0;
 
+        /* Tracks the last time an input was read, so we can sleep the LEDs */
+        uint32_t _millisSinceLastInput = 0;
+        
 
-//        void _setupInputPin(int pin, bool pullUp);
-//        void _setupOutputPin(int pin);
-  
+        void _processAsAwake(int msSinceLastProcess);
+        void _processAsAsleep(int msSinceLastProcess);
 };
 

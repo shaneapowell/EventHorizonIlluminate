@@ -30,12 +30,15 @@ SOFTWARE.
 #include <HID-Project.h>
 
 #define PIN_ONBOARD_LED     13
-
+#define GPIO_DELAY_MS   4
 const char* PROGRAM_NAME  =  "ArcadeIlluminate (v1.0)";
+
 
 TaskHandle_t handleTaskJoystick;
 TaskHandle_t handleTaskCmd;
 TaskHandle_t handleTaskGpio;
+
+SemaphoreHandle_t _gpioSemaphore;
 
 ALGpio*         _gpio;
 ALHIDJoystick<GamepadAPI>*  _hidJoystick;
@@ -56,8 +59,8 @@ static void _threadProcessHidJoystick( void *pvParameters )
 {
     while(true)
     {
+        xSemaphoreTake(_gpioSemaphore, portMAX_DELAY);
         _hidJoystick->process();
-        _threadDelayMs(1); 
     }
   
     vTaskDelete( NULL );
@@ -70,9 +73,10 @@ static void _threadProcessGpio( void *pvParameters )
 {
     while(true)
     {
-        _gpio->process();
+        _gpio->process(GPIO_DELAY_MS);
+        xSemaphoreGive(_gpioSemaphore);
         /* approx <1ms to process + 4ms delay = 200x per second. Should be fast enough I think, and even do a bit of a debounce */
-        _threadDelayMs(4); 
+        _threadDelayMs(GPIO_DELAY_MS); 
     }
   
     vTaskDelete( NULL );
@@ -86,7 +90,7 @@ static void _threadProcessCmd( void *pvParameters )
     while (true)
     {
         _cmd->process();
-        _threadDelayMs(10);
+        _threadDelayMs(50);
     }
     vTaskDelete( NULL );
 }
@@ -156,10 +160,10 @@ void setup()
     vSetErrorLed(PIN_ONBOARD_LED, HIGH);
     vSetErrorSerial(&Serial);
 
-
-    xTaskCreate(_threadProcessGpio,        "GPIO Task",      256, NULL, tskIDLE_PRIORITY + 1, &handleTaskGpio);
-    xTaskCreate(_threadProcessHidJoystick, "Joystick Task",  256, NULL, tskIDLE_PRIORITY + 1, &handleTaskJoystick);
-    xTaskCreate(_threadProcessCmd,         "Command Task",   384, NULL, tskIDLE_PRIORITY + 1, &handleTaskCmd);
+    _gpioSemaphore = xSemaphoreCreateBinary();
+    xTaskCreate(_threadProcessGpio,        "GPIO Task",      256, NULL, 2, &handleTaskGpio);
+    xTaskCreate(_threadProcessHidJoystick, "Joystick Task",  256, NULL, 3, &handleTaskJoystick);
+    xTaskCreate(_threadProcessCmd,         "Command Task",   384, NULL, 1, &handleTaskCmd);
 
     /* Start the RTOS, this function will never return and will schedule the tasks. */
     vTaskStartScheduler();

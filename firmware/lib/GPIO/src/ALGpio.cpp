@@ -23,6 +23,7 @@ SOFTWARE.
 ***/
 
 #include "ALGpio.h"
+#include <stdint.h>
 
 /**************************************************************
  *
@@ -133,22 +134,75 @@ void ALGpio::begin()
     }
     
     /* Initial State */
-    process();
+    process(0);
 
 }
 
 /************************************************
  * Thread Process stage
  ************************************************/
-#include <FreeRTOS_SAMD21.h>
-void ALGpio::process()
+#include "Arduino.h"
+void ALGpio::process(int msSinceLastProcess)
 {
-    /* Write Outputs */
-    _pinSource->writeGPIO(_mcpOut);
-
-    /* Read Input */
-    _mcpIn = _pinSource->readGPIO();
+    /* Write Outputs, all high if we're asleep */
+    if (_millisSinceLastInput >= MILLIS_NO_INPUT_SLEEP)
+    {
+        _processAsAsleep(msSinceLastProcess);
+    }
+    else
+    {
+        _processAsAwake(msSinceLastProcess);
+    }
 
 }
 
 
+/**********************************************************
+ * Normal pin processing, users is activly using joystick 
+ **********************************************************/
+void ALGpio::_processAsAwake(int msSinceLastProcess)
+{
+    _pinSource->writeGPIO(_mcpOut);
+    uint32_t mcpIn = _pinSource->readGPIO();
+
+    /* If no input has been detected , add to the lastProcess ms tracker */
+    if (mcpIn == _mcpIn) 
+    {
+        _millisSinceLastInput += msSinceLastProcess;
+    }
+    else
+    {
+        /* Or, reset it to 0 if an input was detected */
+        _millisSinceLastInput = 0;
+    }
+
+    _mcpIn = mcpIn;
+}
+
+/**********************************************************
+ * Alseep Pin Processing, user is not here, LEDs are turned off
+ **********************************************************/
+void ALGpio::_processAsAsleep(int msSinceLastProcess)
+{
+    _pinSource->writeGPIO(0xFFFFFFFF);
+
+    /* First time into sleep mode, the above write affects the followng 
+      reads for compare, so get the new pin state mask first */ 
+    if (_millisSinceLastInput < UINT32_MAX)
+    {
+        _mcpIn = _pinSource->readGPIO();
+        _millisSinceLastInput = UINT32_MAX;
+    }
+
+    /* Get the pins, if they have changed, restore the leds and the timeout counter */
+    uint32_t mcpIn = _pinSource->readGPIO();
+    if (mcpIn != _mcpIn) 
+    {
+        _pinSource->writeGPIO(_mcpOut);
+        _millisSinceLastInput = 0;
+    }
+
+    /* Move over the pin mask result */
+    _mcpIn = mcpIn;
+
+}

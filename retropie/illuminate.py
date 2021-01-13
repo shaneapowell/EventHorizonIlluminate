@@ -200,7 +200,7 @@ def sendCommand(tty, command, printOnly):
 		return
 		
 	# Send to the usb serial port
-	command += "\r"
+	command += "\n"
 	ser = serial.Serial(tty, 9600, timeout=0.5)
 	ser.write(command.encode())
 	ser.flush()
@@ -325,20 +325,10 @@ def main():
 	
 	# Flash the buttons to tell the user a default was used
 	if enableFallbackFlashIndicator and args.noflash == False:
-		sendCommand(args.tty, "flash 2 %d %s" % (_FLASH_INTERVAL*3, idList), args.printonly)
-		sendCommand(args.tty, "on %s" % (idList), args.printonly)
+		sendCommand(args.tty, "off all; flash 2 %d %s; on %s;" % (_FLASH_INTERVAL*3, idList, idList), args.printonly)
 	elif args.noflash == False:
 		# Quick-Flash the buttons to indicate an accurate mapping
-		sendCommand(args.tty, "flash 2 %d %s" % (/home/spowell/devel/ArcadeIlluminate/retropie/config.ini
-/home/spowell/devel/ArcadeIlluminate/retropie/megadrive.ini
-/home/spowell/devel/ArcadeIlluminate/retropie/n64.ini
-/home/spowell/devel/ArcadeIlluminate/retropie/nes.ini
-/home/spowell/devel/ArcadeIlluminate/retropie/psx.ini
-/home/spowell/devel/ArcadeIlluminate/retropie/snes.ini
-/home/spowell/devel/ArcadeIlluminate/retropie/systems.ini
-/home/spowell/devel/ArcadeIlluminate/retropie/illuminate.py
-/home/spowell/devel/ArcadeIlluminate/retropie/arcade.xml, idList), args.printonly)
-		sendCommand(args.tty, "on %s" % (idList), args.printonly)
+		sendCommand(args.tty, "off all; flash 2 %d %s; on %s;" % (_FLASH_INTERVAL, idList, idList), args.printonly)
 	
 
 if __name__ == "__main__":
