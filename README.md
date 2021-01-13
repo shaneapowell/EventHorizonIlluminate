@@ -1,4 +1,7 @@
 
+# UPDATE(Jan 13 2021) - Major Re-Write and Re-Work under way.
+I'm in the process of doing a total re-write of this project. Instead of being an add-on to an existing encoder board, I'm creating a fully open-source encoder board that will include the ability to fully control the LED button lights.
+
 # INCOMPLETE - A work still in progress... Please check back soon!! #
 This project is a work in progress with very active development.  Please be patient and check back soon for a complete and useable tool.
 
