@@ -37,14 +37,15 @@ Commands:\n\
   on     <buttons>                       - Turn on the indicated LEDs.\n\
   off    <buttons>                       - Turn off the indicated LEDs.\n\
   flash  <count> <interval> <buttons>    - Flash the LEDs <count> times.\n\
-  bootseq                                - Run the boot animation sequence.\n\
+  seq    <animation>                     - Run the named animation sequence.\n\
   dump                                   - Print system process info.\n\
   help                                   - Print this help\n\
 \n\
 Options:\n\
-     <buttons>   - space separated list of button indexes 1-12. Or the key word \"all\" for all buttons.\n\
+     <buttons>   - space separated list of buttons 1-12. Or the key word \"all\" for all buttons.\n\
      <count>     - The number of flashes.\n\
      <inteval>   - Time in milliseconds between flashes.\n\
+     <animation> - boot, fadein, fadeout.\n\
 \n\
 Examples:\n\
     >flash 5 250 1 3 5       # Flash LEDs 1, 3, 5  5x with 250ms between.\n\
@@ -82,7 +83,7 @@ class ALCmd
             _cmdOn = _cli.addBoundlessCommand("on");
             _cmdOff = _cli.addBoundlessCommand("off");
             _cmdFlash = _cli.addBoundlessCommand("flash");
-            _cmdBootSeq = _cli.addCommand("bootseq");
+            _cmdSeq = _cli.addSingleArgumentCommand("seq");
             _cmdDump = _cli.addCommand("dump");
             _cmdHelp = _cli.addCommand("help");
 
@@ -99,7 +100,9 @@ class ALCmd
             /* First time by default, we run up the boot sequence, and turn them all on. */
             if (!_isFinishedBootSeq)
             {
-                _bootSeqCommand(NULL);
+                Command cmd;
+                cmd.addArg("boot");
+                _seqCommand(NULL);
             }
             _isFinishedBootSeq = true;
                         
@@ -132,7 +135,7 @@ class ALCmd
                         if (cmd == _cmdOn) _onCommand(cmd.getPtr());
                         if (cmd == _cmdOff) _offCommand(cmd.getPtr());
                         if (cmd == _cmdFlash) _flashCommand(cmd.getPtr());
-                        if (cmd == _cmdBootSeq) _bootSeqCommand(cmd.getPtr());
+                        if (cmd == _cmdSeq) _seqCommand(cmd.getPtr());
                         if (cmd == _cmdDump) _fptrMonitorDump();
                         if (cmd == _cmdHelp) _helpCommand();
                         
@@ -170,7 +173,7 @@ class ALCmd
         Command _cmdOn;
         Command _cmdOff;
         Command _cmdFlash;
-        Command _cmdBootSeq;
+        Command _cmdSeq;
         Command _cmdDump;
         Command _cmdHelp;
 
@@ -294,24 +297,35 @@ class ALCmd
          * respond to the "bootseq" command. Just a quick set of 2 animated
          * on-off-on-off up the LEDs.
         *****************************************************************/
-        void _bootSeqCommand(cmd* c)
+        void _seqCommand(cmd* c)
         {
-            _serial->println("  -> Boot Sequence");
-            
-            /* Start Off */
-            uint16_t ledMask = ALL_LED_MASK;
-            _sendLedState(ledMask, true);
+            Command cmd(c);
+            Argument arg = cmd.getArgument(0);
+            String argVal = arg.getValue();
 
-            /* off -> on -> off -> on */
-            for (int onoff = 0; onoff < 4; onoff++)
+            _serial->print("  -> Sequence ["); _serial->print(argVal.c_str()); _serial->println("]");
+            
+            if (argVal == "boot")
             {
-                ledMask = 1;
-                for (int index = 0; index < LED_COUNT; index++)
+                /* Start Off */
+                uint16_t ledMask = ALL_LED_MASK;
+                _sendLedState(ledMask, true);
+
+                /* off -> on -> off -> on */
+                for (int onoff = 0; onoff < 4; onoff++)
                 {
-                    _sendLedState(ledMask, onoff % 2 != 0);
-                    _fptrDelayMs(20);
-                    ledMask = (ledMask << 1) | 1;
+                    ledMask = 1;
+                    for (int index = 0; index < LED_COUNT; index++)
+                    {
+                        _sendLedState(ledMask, onoff % 2 != 0);
+                        _fptrDelayMs(20);
+                        ledMask = (ledMask << 1) | 1;
+                    }
                 }
+            }
+            else
+            {
+                _serial->println("Unknown Sequence Name");
             }
 
         }

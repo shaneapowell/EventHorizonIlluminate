@@ -40,9 +40,9 @@ TaskHandle_t handleTaskGpio;
 
 SemaphoreHandle_t _gpioSemaphore;
 
-ALGpio*         _gpio;
+ALGpio*                     _gpio;
 ALHIDJoystick<GamepadAPI>*  _hidJoystick;
-ALCmd*          _cmd;
+ALCmd*                      _cmd;
 
 /****************************************************************
  * Can use these function for RTOS delays
@@ -53,7 +53,8 @@ void _threadDelayUs(int us) { vTaskDelay( us / portTICK_PERIOD_US ); }
 void _threadDelayMs(int ms) { vTaskDelay( ms/ portTICK_PERIOD_MS );  }
 
 /**********************************************
- * Joystick HID Thread
+ * Joystick HID Thread.
+ * Highest Priority, blocked the the GPIO thread.
  **********************************************/ 
 static void _threadProcessHidJoystick( void *pvParameters )
 {
@@ -67,15 +68,21 @@ static void _threadProcessHidJoystick( void *pvParameters )
 }
 
 /**********************************************
- * Hardware GPIO Thread
+ * Hardware GPIO Thread.
+ * 2nd highest priority, sleeps for about 4-5ms interval
+ * resulting in a 200x / second RW speed.
  **********************************************/ 
 static void _threadProcessGpio( void *pvParameters )
 {
+    unsigned long lastMs = millis();
+    unsigned long thisMs = millis();
     while(true)
     {
-        _gpio->process(GPIO_DELAY_MS);
+        thisMs = millis();
+        if (thisMs < lastMs) { lastMs = thisMs; } /* millis() wrap around */
+        _gpio->process(thisMs - lastMs);
+        lastMs = thisMs;
         xSemaphoreGive(_gpioSemaphore);
-        /* approx <1ms to process + 4ms delay = 200x per second. Should be fast enough I think, and even do a bit of a debounce */
         _threadDelayMs(GPIO_DELAY_MS); 
     }
   
@@ -83,7 +90,8 @@ static void _threadProcessGpio( void *pvParameters )
 }
 
 /**********************************************
- * Command Thread
+ * Command Thread.
+ * Lowest priority. A few ticks missed here means very little.
  **********************************************/ 
 static void _threadProcessCmd( void *pvParameters )
 {

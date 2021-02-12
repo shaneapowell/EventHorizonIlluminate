@@ -32,10 +32,12 @@ SOFTWARE.
 
 #include <stdint.h>
 
-#define BUTTON_COUNT    16
-#define LED_COUNT       12
-#define JOYSTICK_AXIS_COUNT 4
-#define MILLIS_NO_INPUT_SLEEP  (1000 * 10)
+#define BUTTON_COUNT            16
+#define LED_COUNT               12
+#define JOYSTICK_AXIS_COUNT     4
+
+/* 10 minutes of no input, put leds to sleep */
+#define MILLIS_NO_INPUT_SLEEP  (1000 * 60 * 10)
 
 #define MCPA_PIN_GPA0            0
 #define MCPA_PIN_GPA1            1
@@ -76,7 +78,7 @@ SOFTWARE.
 #define PIN_INPUT_B2        MCPA_PIN_GPA2
 #define PIN_INPUT_B3        MCPA_PIN_GPA4
 #define PIN_INPUT_B4        MCPA_PIN_GPA6
-#define PIN_INPUT_B5        MCPA_PIN_GPB0
+#define PIN_INPUT_B5        MCPA_PIN_GPB1
 #define PIN_INPUT_B6        MCPA_PIN_GPB2
 #define PIN_INPUT_B7        MCPA_PIN_GPB4
 #define PIN_INPUT_B8        MCPA_PIN_GPB6
@@ -90,15 +92,15 @@ SOFTWARE.
 #define PIN_INPUT_B16       MCPB_PIN_GPB4
 
 #define PIN_INPUT_UP        MCPB_PIN_GPB0
-#define PIN_INPUT_DOWN      MCPB_PIN_GPB1
-#define PIN_INPUT_LEFT      MCPB_PIN_GPB3
+#define PIN_INPUT_DOWN      MCPB_PIN_GPB3
+#define PIN_INPUT_LEFT      MCPB_PIN_GPB1
 #define PIN_INPUT_RIGHT     MCPB_PIN_GPB2
 
 #define PIN_OUTPUT_B1       MCPA_PIN_GPA1
 #define PIN_OUTPUT_B2       MCPA_PIN_GPA3
 #define PIN_OUTPUT_B3       MCPA_PIN_GPA5
 #define PIN_OUTPUT_B4       MCPA_PIN_GPA7
-#define PIN_OUTPUT_B5       MCPA_PIN_GPB1
+#define PIN_OUTPUT_B5       MCPA_PIN_GPB0
 #define PIN_OUTPUT_B6       MCPA_PIN_GPB3
 #define PIN_OUTPUT_B7       MCPA_PIN_GPB5
 #define PIN_OUTPUT_B8       MCPA_PIN_GPB7
@@ -192,7 +194,6 @@ class ALGpio
         /* Tracks the last time an input was read, so we can sleep the LEDs */
         uint32_t _millisSinceLastInput = 0;
         
-
         void _processAsAwake(int msSinceLastProcess);
         void _processAsAsleep(int msSinceLastProcess);
 };
