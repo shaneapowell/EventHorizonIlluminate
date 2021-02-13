@@ -1,11 +1,13 @@
-# NOTES for v2:
-- add usbhid.jspoll=1 to /boot/config.txt
-- use Atmel USB VID/PID (https://microchipsupport.force.com/s/article/Using-Atmel-VID-PID)
-- Add auto-config support to retro arch? (https://github.com/libretro/retroarch-joypad-autoconfig/blob/master/hid/8BitDo_Zero2_gamepad_BT.cfg)
-
+# UPDATE(Jan 13 2021) - Major Re-Write and Re-Work under way v2.0 is going to be a vast improvement.  Please Stand By.
 
 # INCOMPLETE - A work still in progress... Please check back soon!! #
 This project is a work in progress with very active development.  Please be patient and check back soon for a complete and useable tool.
+
+# NOTES for v2:
+- add usbhid.jspoll=1 to /boot/config.txt
+- Add auto-config support to retro arch? (https://github.com/libretro/retroarch-joypad-autoconfig/blob/master/hid/8BitDo_Zero2_gamepad_BT.cfg)
+
+# TBD...
 
 # Arcade Illuminate
 A super-simple circuit board and python script that can control arcade cabinet button LEDs.  Have the buttons light up on a per-game or per-system basis.  It's running on my system with 5v LEDs, but should have no problem running almost any voltage, and up to about an amp of current.  If you have the skills to build your own RetroPie cabinet.. odds are you have the skills to build one of these circuit boards.
@@ -182,12 +184,12 @@ B16=12
 Check the output of illuminate.py when manually running it at the command prompt.  The logfile `/tmp/illuminate.log` is also a good place to start.  If need be, add the `-d` option to add more debugging output.  
 
 # FAQ
-***Q: Why do the lights flash slowly 4 times?***
+***Q: Why do the lights flash slowly 2 times?***
 
 A: This indicates that an error occured trying to find the correct buttons to light up. 4 show flashes means that some sort of "default" button configuration was used.  Check the logfile to see what errors caused this.
 
 ---
-***Q: Why do the lights flash quickly 2 times?***
+***Q: Why do the lights flash quickly 4 times?***
 
 A: This indicates a success!  It's quicly telling you that the buttons that are lit up are correct.  It means a mapping was found in one of the .xml files, and in the config.ini file.
 
@@ -207,17 +209,9 @@ A: Button definitions are defined in the `systems.ini` file.  Each emulation sys
 A: TBA.. (modify the <system name>.xml file)
 
 ---
-***Q: What is up with the bloated confusing XML format for the game button mappings?***
-
-A: Sorry about that... but.. since I had somewhere around 3500 MAME games to map, I wasn't about to try and manually map each game myself.  So, using the Controls.xml file from [!src](http://forum.arcadecontrols.com/index.php/topic,98241.0.html) I opted to continue using the same source format. That said.. I hate the XML format, so I'm already working on switching to a .ini format for the game mappings.
-
-#CONTRIBUTE
-I'm acceping pull-requests for any modifications to the button definition XML files.  I'll push any changes I make, and I encourage anybody to help me by pushing any changes they make too.
-
-Also.. I'm not a circuit expert.. I'm a hobbyist.  If any electronics experts out there can improve on my design.. please do.. I'll happily link to your designs here.
-
 # FUTURE PLANS
-GPIO? Not everybody wants to bother with adding a MCP23107 chip for i2c support.  That said.. some of you will not event want to use the UNL2803 chip to sink the current.. someone will have very low current LEDs wired in, and want to sink, or source the current directly to the LEDs using the Raspberry Pis GPIO pins.  While, I don't think that is a good idea, I'm considering adding direct GPIO control in a future release.  Should be somewhat simple to add afterall.
 
-#RESOURCES:
+
+# RESOURCES:
 - http://forum.arcadecontrols.com/index.php/topic,98241.0.html
+- https://retropie.org.uk/forum/topic/1550/led-controller-that-works-with-retropie/13
