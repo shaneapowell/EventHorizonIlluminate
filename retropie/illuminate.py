@@ -26,7 +26,6 @@ SOFTWARE.
 import argparse
 import serial, os, sys, getopt, time
 import serial.tools.list_ports
-import xml.etree.ElementTree as ET
 from configparser import ConfigParser
 import logging
 
@@ -34,13 +33,12 @@ import logging
 # Constants
 _SETTINGS_SECTION="settings"
 _CONFIG_FILE="config.ini"
-_REMAP_Pn_PREFIX_FORMAT="P%d_"
-_FLASH_INTERVAL = 100
+_FLASH_INTERVAL = 70
 _KEY_SYSTEM="system"
 _KEY_ROM="rom"
 _KEY_BUTTONS="buttons"
-_KEY_NUMPLAYERS="numPlayers"
-_KEY_SIMULTANEOUS="simultaneous"
+_KEY_NUMPLAYERS="players"
+_KEY_ALTERNATING="alternating"
 _KEY_CONTROLLERBUTTONS="controllerButtons"
 _KEY_PLAYER="player"
 _KEY_COIN="coin"
@@ -55,96 +53,23 @@ Depending on the extension of the mapfile, load the
 correct Game Info into the returnd dict.
 {
     buttons: [X,Y,A,B],
-    numPlayers: 2
-    simultaneous: True
+    players: 2
+    alternating: 1
 }
 '''
 def createMapFileGameConfig(system, rom):
     # First, try to load the .ini file, if that fails,
     # try the .xml file.  
-    gameCfg = getXMLGameConfig(system, rom)
-    if gameCfg == None:
-        gameCfg = getINIGameConfig(system, rom)
+    gameCfg = getINIGameConfig(system, rom)
     
     if gameCfg == None:
-        logging.warning("No xml or ini mapfile found for system:[%s], no buttons mapped" % (system))
+        logging.warning("No .ini mapfile found for system:[%s], no buttons mapped" % (system))
         return None
 
     gameCfg[_KEY_SYSTEM] = system
     gameCfg[_KEY_ROM] = rom
     return gameCfg
 
-
-'''
-Read the emulators XML file and return a list of active buttons for the 
-provided emulator&rom. return None if nothing was found.  
-[P1_BUTTON1, P1_BUTTON2, P2_BUTTON1, P2_BUTTON2]
-'''
-def getXMLGameConfig(emulator, rom):
-
-    mapfile = emulator + ".xml"
-    buttonList = []
-    
-    try:
-        systemConfigFile = "%s/%s" % (_basePath, mapfile)
-        logging.info("Reading control info from config file:[%s] for rom:[%s]" % (systemConfigFile, rom))
-        
-        controls = ET.parse(systemConfigFile)
-        root = controls.getroot()
-        game = root.findall(".//Game/[@RomName='%s']" % (rom))
-        
-        if len(game) == 0:
-            raise Exception("Rom [%s] Not Found in config" % rom)
-        
-        game = game[0]
-        numPlayers = int(game.get("NumPlayers"))
-        simultaneous = 0 == int(game.get("Alternating"))
-        
-        players = game.findall("./Player")
-        #labels = game.findall(".//Label")
-        
-        logging.debug("Game: %s" % game.get("RomName"))
-        logging.debug("Players: %d" % numPlayers)
-        logging.debug("Simultaneous: %s" % str(simultaneous)) 
-        #logging.debug("Labels: " + str(len(labels)))
-
-        for playerIndex in range(0, numPlayers if simultaneous else 1):
-            remapPlayer1 = False
-            
-            if playerIndex >= len(players):
-                player = players[0]
-                remapPlayer1 = True & simultaneous
-            else:
-                player = players[playerIndex]
-            
-            labels = player.findall(".//Label")
-            
-            logging.debug("Mapping [%d] player[%d] buttons" % (len(labels), playerIndex+1))
-            
-            if remapPlayer1:
-                p1Prefix = _REMAP_Pn_PREFIX_FORMAT % (1)
-                remapPrefix = _REMAP_Pn_PREFIX_FORMAT % (playerIndex+1)
-                logging.debug("Player[%d] not found in xml config, creating [%s] from [%s] buttons" % ((playerIndex+1), remapPrefix, p1Prefix))
-
-            
-            for button in labels:
-                name = button.get("Name")
-                if remapPlayer1:
-                    name = name.replace(p1Prefix, remapPrefix, 1)
-                buttonList.append(name)
-        
-            logging.debug("Found Buttons %s" % buttonList)
-        
-    except Exception as e:
-        buttonList = None
-        logging.exception("Error Loading Button Data for [%s][%s] not found in [%s]" % (emulator, rom, systemConfigFile))
-        
-    return {
-        "buttons": buttonList,
-        "numPlayers": numPlayers,
-        "simultaneous": simultaneous
-    }
-    #return {"numPlayers":len(players), "alternating":alternating == 1, "buttons": buttons}
 
 
 '''
@@ -165,10 +90,10 @@ def getINIGameConfig(system, rom):
             logging.warning("ROM:[%s] section not found in [%s]" %(rom, systemConfigFile))
             return None
             
-        numPlayers = cfg.getint(rom, "numplayers")
-        simultaneous = False == cfg.getboolean(rom, "alternating")
+        numPlayers = cfg.getint(rom, _KEY_NUMPLAYERS)
+        alternating = cfg.getint(rom, _KEY_ALTERNATING) == 1
         
-        logging.info("Players:[%d] Simultaneous:[%s]" % (numPlayers, simultaneous))
+        logging.info("Players:[%d] Alternating:[%s]" % (numPlayers, alternating))
         
         if cfg.has_option(rom, "buttons") == False:
             logging.warning("buttons CSV option not found in rom section:[%s]" %(csvName, rom))
@@ -177,13 +102,13 @@ def getINIGameConfig(system, rom):
         logging.info("Button List [%s]" % (str(buttonCsv)))
         
     except Exception as e:
-        buttonList = None
         logging.exception("Error Loading Button Data for [%s][%s] not found in [%s]" % (system, rom, systemConfigFile))
+        return None
         
     return {
-        "buttons": buttonList,
-        "numPlayers": numPlayers,
-        "simultaneous": simultaneous
+        _KEY_BUTTONS: buttonList,
+        _KEY_NUMPLAYERS: numPlayers,
+        _KEY_ALTERNATING: alternating
     }
     
     
@@ -326,12 +251,15 @@ def main():
     if gameCfg == None:
         enableFallbackFlashIndicator = True
         logging.warning("No Button list found for system:[%s] rom:[%s], generating a default list." % (systemName, romName))
+        blist = []
+        for btn in _config.items(systemName):
+            blist.append(btn[0].upper())
         gameCfg = {
-            _KEY_SYSTEM: _VAL_DEFAULT,
+            _KEY_SYSTEM: systemName,
             _KEY_ROM: _VAL_DEFAULT,
-            _KEY_BUTTONS: [],
+            _KEY_BUTTONS: blist,
             _KEY_NUMPLAYERS: 4,
-            _KEY_SIMULTANEOUS: True
+            _KEY_ALTERNATING: False
         }
 
 
@@ -345,17 +273,22 @@ def main():
     controlerTTYDevices = findSerialDevices(0x1209, 0xbdb1)
 
     # Now, for each found controller. Turn on the active ones, and off the inactive ones    
+    deviceIndex = -1
     for ttyDevice in controlerTTYDevices:
-        logging.info("Found " + hex(ttyDevice.vid) + ":" + hex(ttyDevice.pid) + " " + ttyDevice.manufacturer + " - " + ttyDevice.product + " @ " + ttyDevice.location + " -> " + ttyDevice.device)
+        deviceIndex += 1
+        logging.info("[%d] Found %s:%s %s - %s @ %s -> %s" % (deviceIndex, hex(ttyDevice.vid), hex(ttyDevice.pid), ttyDevice.manufacturer, ttyDevice.product, ttyDevice.location, ttyDevice.device))
         controllerButtons = gameCfg[_KEY_CONTROLLERBUTTONS]
 
-        # Flash the buttons to tell the user a default was used
-        if enableFallbackFlashIndicator and args.noflash == False:
-            sendCommand(ttyDevice.device, "off all; flash 2 %d %s; on %s;" % (_FLASH_INTERVAL*3, controllerButtons, controllerButtons), args.printonly)
-        elif args.noflash == False:
-            # Quick-Flash the buttons to indicate an accurate mapping
-            sendCommand(ttyDevice.device, "off all; flash 2 %d %s; on %s;" % (_FLASH_INTERVAL, controllerButtons, controllerButtons), args.printonly)
-    
+        if deviceIndex == 0 or (deviceIndex < gameCfg[_KEY_NUMPLAYERS] and not gameCfg[_KEY_ALTERNATING]):
+            # Flash the buttons to tell the user a default was used
+            if enableFallbackFlashIndicator and args.noflash == False:
+                sendCommand(ttyDevice.device, "off all; flash 2 %d %s; on %s;" % (_FLASH_INTERVAL*3, controllerButtons, controllerButtons), args.printonly)
+            elif args.noflash == False:
+                # Quick-Flash the buttons to indicate an accurate mapping
+                sendCommand(ttyDevice.device, "off all; flash 4 %d %s; on %s;" % (_FLASH_INTERVAL, controllerButtons, controllerButtons), args.printonly)
+        else:
+            sendCommand(ttyDevice.device, "off all", args.printonly)
+
 
 if __name__ == "__main__":
     main()

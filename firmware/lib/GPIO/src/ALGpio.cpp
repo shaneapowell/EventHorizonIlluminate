@@ -70,6 +70,9 @@ void ALGpio::setLed(LED l, bool on)
         return;
     }
  
+    /* Any set led, even if it has no affect, will awaken the device */
+    _millisSinceLastInput = 0;
+
     uint32_t mask = (1 << l);
     if (on) 
     {
