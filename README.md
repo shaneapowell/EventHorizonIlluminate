@@ -28,8 +28,9 @@ TBD
 # Note:
 These instructions are currently tailored for a RetroPie install, adjustments might be necessary if you are using this software on a non RetroPie based system.
 
-# Build the Circuit Board
-TBD
+# The Circuit Board
+TBD: Where to get.
+https://oshwlab.com/shaneapowell/arcadeilluminatev3
 
 ## Parts Needed
 TBD
