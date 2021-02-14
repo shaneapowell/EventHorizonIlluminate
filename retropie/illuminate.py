@@ -34,6 +34,7 @@ import logging
 _SETTINGS_SECTION="settings"
 _CONFIG_FILE="config.ini"
 _FLASH_INTERVAL = 70
+_KEY_CONTROLLER="controller"
 _KEY_SYSTEM="system"
 _KEY_ROM="rom"
 _KEY_BUTTONS="buttons"
@@ -91,9 +92,16 @@ def getINIGameConfig(system, rom):
             return None
             
         numPlayers = cfg.getint(rom, _KEY_NUMPLAYERS)
-        alternating = cfg.getint(rom, _KEY_ALTERNATING) == 1
+        alternating = False
+        try:
+            alternating = cfg.getint(rom, _KEY_ALTERNATING) == 1
+        except ValueError as e:
+            try:
+                alternating = cfg.get(rom, _KEY_ALTERNATING).lower() == "true"
+            except:
+                logging.error("Unable to read alternating=[0,1] from value[%s]" % cfg.get(rom, _KEY_ALTERNATING))
         
-        logging.info("Players:[%d] Alternating:[%s]" % (numPlayers, alternating))
+        logging.info("Players:[%d] Alternating:[%s]" % (numPlayers, str(alternating)))
         
         if cfg.has_option(rom, "buttons") == False:
             logging.warning("buttons CSV option not found in rom section:[%s]" %(csvName, rom))
@@ -173,12 +181,14 @@ def getButtonId(emulatorName, buttonName):
     global _basePath
     global _config
     try:
-        logging.debug("Getting button ID for emulator:[%s] button:[%s]" % (emulatorName, buttonName))
+        logging.debug("Getting button Code for emulator:[%s] button:[%s]" % (emulatorName, buttonName))
         btnCode = _config.get(emulatorName, buttonName)
         logging.debug("Found Button Code:[%s] in emulator section:[%s]" % (btnCode, emulatorName))
-        btnId = btnCode[1:]
-    except:
+        btnId = _config.get(_KEY_CONTROLLER, btnCode)
+        logging.info("Found Controller Output Id [%s] for Button Code: [%s]" % (btnId, btnCode))
+    except Exception as e:
         logging.warning("Button not found in [%s] for emulator:[%s] button:[%s] . Skipping" % (_CONFIG_FILE, emulatorName, buttonName))
+        logging.debug(str(e))
         return -1
     return int(btnId)
 
@@ -198,9 +208,12 @@ def loadConfig():
 
 '''Find and sort our serial tty devices by our known vid:pid'''
 def findSerialDevices(vid, pid):
+    reverse = False
+    if _config.get(_KEY_CONTROLLER, "sort_controllers").lower() == "reverse":
+        reverse = True
     ports = serial.tools.list_ports.comports()
     ports = filter(lambda x: x.vid != None and x.vid == 0x1209 and x.pid == 0xbdb1, ports)
-    ports = sorted(ports, key=lambda x: (x.location))
+    ports = sorted(ports, key=lambda x: (x.location), reverse=reverse)
     return ports
 
 
@@ -271,7 +284,7 @@ def main():
 
     # Get our controller tty serial devices by our VID:PID 
     controlerTTYDevices = findSerialDevices(0x1209, 0xbdb1)
-
+        
     # Now, for each found controller. Turn on the active ones, and off the inactive ones    
     deviceIndex = -1
     for ttyDevice in controlerTTYDevices:

@@ -1,2 +1,4 @@
 #!/bin/sh
-python3 /home/pi/illuminate/illuminate.py emulationstation default /dev/ttyACM0
+# Copy this file into the /opt/retropie/all folder.  
+# It's the same folder as the "configs/all" windows share.
+python3 /opt/retropie/even-horizon/illuminate.py emulationstation default
