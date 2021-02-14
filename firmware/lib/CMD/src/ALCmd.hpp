@@ -25,6 +25,7 @@ SOFTWARE.
 #pragma once
 
 #include "ALGpio.h"
+#include "ALLed.h"
 #include <SimpleCLI.h>
 
 #define CMD_SERIAL_BUFFER_SIZE 256
@@ -94,7 +95,7 @@ class ALCmd
          * Create a thread that process the incomming serial commands,
          * then executes the request.
         *****************************************************************/
-        void process() 
+        void process(ALLed* led) 
         {
 
             /* First time by default, we run up the boot sequence, and turn them all on. */
@@ -131,6 +132,8 @@ class ALCmd
 
                     if (_cli.available())
                     {
+                        led->showState(LED_STATE_COMMAND);
+
                         Command cmd = _cli.getCmd();
                         if (cmd == _cmdOn) _onCommand(cmd.getPtr());
                         if (cmd == _cmdOff) _offCommand(cmd.getPtr());
@@ -138,12 +141,14 @@ class ALCmd
                         if (cmd == _cmdSeq) _seqCommand(cmd.getPtr());
                         if (cmd == _cmdDump) _fptrMonitorDump();
                         if (cmd == _cmdHelp) _helpCommand();
-                        
+
+                       
                     }
 
                     /* Output any errors */
                     if (_cli.errored()) 
                     {
+                        led->showState(LED_STATE_ERROR);
                         _serial->println(_cli.getError().toString());
                         _helpCommand();
                     }

@@ -31,6 +31,7 @@ SOFTWARE.
 #pragma once
 
 #include <stdint.h>
+#include <ALLed.h>
 
 #define BUTTON_COUNT            16
 #define LED_COUNT               12
@@ -175,7 +176,7 @@ class ALGpio
     public:
         ALGpio(ALGpioPinSource* p);
         virtual void begin();
-        virtual void process(int msSinceLastProcess);
+        virtual void process(int msSinceLastProcess, ALLed *led);
         virtual bool getJoystick(JOYSTICK j);
         virtual bool getButton(BUTTON b);
         virtual void setLed(LED l, bool on);

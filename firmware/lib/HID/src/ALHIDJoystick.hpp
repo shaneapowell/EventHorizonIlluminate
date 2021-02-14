@@ -25,6 +25,7 @@ SOFTWARE.
 #pragma once
 
 #include "ALGpio.h"
+#include "ALLed.h"
 
 /* These are the master/source Classes to the GamepadAPI_T template. Hidden away to allow for native unit tests */
 //#include <HID-APIs/GamepadAPI.h>
@@ -82,12 +83,13 @@ class ALHIDJoystick
         /*****************************************************************
          * A sinle process stage. To be repeated by it's thread.
          *****************************************************************/
-        void process()
+        void process(ALLed *led)
         {
 
             _readCurrentState();
             if (_isCurrStateDifferent())
             {
+                led->showState(LED_STATE_JOYSTICK);
                 _sendCurrentState();
                 _saveCurrStateToPrevState();
             }

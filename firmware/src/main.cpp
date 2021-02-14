@@ -25,6 +25,7 @@ SOFTWARE.
 #include <FreeRTOS_SAMD21.h>
 #include <ALGpio.h>
 #include <ALCmd.hpp>
+#include <ALLed.h>
 #include <ALHIDJoystick.hpp>
 #include "MCPPinSourceIMPL.h"
 #include <HID-Project.h>
@@ -37,12 +38,14 @@ const char* PROGRAM_NAME  =  "ArcadeIlluminate (v1.0)";
 TaskHandle_t handleTaskJoystick;
 TaskHandle_t handleTaskCmd;
 TaskHandle_t handleTaskGpio;
+TaskHandle_t handleTaskLed;
 
 SemaphoreHandle_t _gpioSemaphore;
 
 ALGpio*                     _gpio;
 ALHIDJoystick<GamepadAPI>*  _hidJoystick;
 ALCmd*                      _cmd;
+ALLed*                      _led;
 
 /****************************************************************
  * Can use these function for RTOS delays
@@ -61,7 +64,7 @@ static void _threadProcessHidJoystick( void *pvParameters )
     while(true)
     {
         xSemaphoreTake(_gpioSemaphore, portMAX_DELAY);
-        _hidJoystick->process();
+        _hidJoystick->process(_led);
     }
   
     vTaskDelete( NULL );
@@ -80,7 +83,7 @@ static void _threadProcessGpio( void *pvParameters )
     {
         thisMs = millis();
         if (thisMs < lastMs) { lastMs = thisMs; } /* millis() wrap around */
-        _gpio->process(thisMs - lastMs);
+        _gpio->process(thisMs - lastMs, _led);
         lastMs = thisMs;
         xSemaphoreGive(_gpioSemaphore);
         _threadDelayMs(GPIO_DELAY_MS); 
@@ -97,8 +100,22 @@ static void _threadProcessCmd( void *pvParameters )
 {
     while (true)
     {
-        _cmd->process();
+        _cmd->process(_led);
         _threadDelayMs(50);
+    }
+    vTaskDelete( NULL );
+}
+
+/**********************************************
+ * Status LED Thread.
+ * AlsoLowest priority. A few ticks missed here means very little.
+ **********************************************/ 
+static void _threadProcessLed( void *pvParameters )
+{
+    while (true) 
+    {
+        _led->process();
+        _threadDelayMs(100);
     }
     vTaskDelete( NULL );
 }
@@ -160,10 +177,12 @@ void setup()
     _gpio = new ALGpio(&pinSource);
     _hidJoystick = new ALHIDJoystick<GamepadAPI>(_gpio, &Gamepad);
     _cmd = new ALCmd(PROGRAM_NAME, _threadDelayMs, &Serial, _gpio, _dumpProcessMonitor);
+    _led = new ALLed();
     
     pinSource.begin();
     _gpio->begin();
     _hidJoystick->begin();
+    _led->begin();
 
     vSetErrorLed(PIN_ONBOARD_LED, HIGH);
     vSetErrorSerial(&Serial);
@@ -172,6 +191,7 @@ void setup()
     xTaskCreate(_threadProcessGpio,        "GPIO Task",      256, NULL, 2, &handleTaskGpio);
     xTaskCreate(_threadProcessHidJoystick, "Joystick Task",  256, NULL, 3, &handleTaskJoystick);
     xTaskCreate(_threadProcessCmd,         "Command Task",   384, NULL, 1, &handleTaskCmd);
+    xTaskCreate(_threadProcessLed,         "LED Task",       256, NULL, 1, &handleTaskLed);
 
     /* Start the RTOS, this function will never return and will schedule the tasks. */
     vTaskStartScheduler();

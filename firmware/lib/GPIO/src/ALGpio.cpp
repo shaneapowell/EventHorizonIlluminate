@@ -137,7 +137,7 @@ void ALGpio::begin()
     }
     
     /* Initial State */
-    process(0);
+    process(0, NULL);
 
 }
 
@@ -145,11 +145,12 @@ void ALGpio::begin()
  * Thread Process stage
  ************************************************/
 #include "Arduino.h"
-void ALGpio::process(int msSinceLastProcess)
+void ALGpio::process(int msSinceLastProcess, ALLed *led)
 {
     /* Write Outputs, all high if we're asleep */
     if (_millisSinceLastInput >= MILLIS_NO_INPUT_SLEEP)
     {
+        led->showState(LED_STATE_SLEEP);
         _processAsAsleep(msSinceLastProcess);
     }
     else
