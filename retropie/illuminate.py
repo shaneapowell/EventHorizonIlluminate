@@ -156,7 +156,7 @@ to, and sending the bytes to the i2c chip.  This is usefull mostly just for debu
 '''
 def sendCommand(tty, command, printOnly):
     
-    logging.info("Sending Command:[%s]" % (command))
+    logging.info("Sending Command:[%s] to [%s]" % (command, tty))
     
     if printOnly == True:
         return
@@ -237,7 +237,7 @@ def main():
     
     # Find the path to this script file, to find all necessary data files.
     _basePath = args.configdir
-            
+
     # Alter the desired verbosity of the output logging
     if args.debug == True:
         logging.basicConfig(level=logging.DEBUG)
@@ -249,7 +249,27 @@ def main():
     # Load the confg file into memory
     loadConfig()
     
-    # TODO: To compensate for the slow(ish) load times of Mame, lets' fire up a background thread that animates the buttons
+    # Get our controller tty serial devices by our VID:PID 
+    controlerTTYDevices = findSerialDevices(0x1209, 0xbdb1)
+
+    # The special "identify" system.
+    if systemName == "identify":
+        if romName == "controllers":
+            deviceIndex = 0
+            for ttyDevice in controlerTTYDevices:
+                deviceIndex += 1
+                sendCommand(ttyDevice.device, "flash %d 500 all" % (deviceIndex),  args.printonly)
+        elif romName.startswith("C"):
+            deviceIndex = int(romName[1:])
+            ttyDevice = controlerTTYDevices[deviceIndex-1]
+            sendCommand(ttyDevice.device, "flash %d 500 all" % (deviceIndex),  args.printonly)
+        elif romName.startswith("B"):
+            buttonIndex = int(romName[1:])
+            for ttyDevice in controlerTTYDevices:
+                sendCommand(ttyDevice.device, "flash 1 500 %d" % (buttonIndex),  args.printonly)
+
+        return
+
         
     # Check that a config.ini section exists for the desired emulator.  If it doesn't, default to ALL buttons.
     if _config.has_section(systemName) == False:
@@ -278,13 +298,9 @@ def main():
 
     # Generate a button ID list for the desired buttons 
     addControllerButtonList(gameCfg)
-#    controllerButtons = ' '.join(map(str, controllerButtons))
-#    gameCfg[_KEY_CONTROLLERBUTTONS] = controllerButtons
     logging.debug(str(gameCfg))
 
-    # Get our controller tty serial devices by our VID:PID 
-    controlerTTYDevices = findSerialDevices(0x1209, 0xbdb1)
-        
+       
     # Now, for each found controller. Turn on the active ones, and off the inactive ones    
     deviceIndex = -1
     for ttyDevice in controlerTTYDevices:
@@ -293,12 +309,16 @@ def main():
         controllerButtons = gameCfg[_KEY_CONTROLLERBUTTONS]
 
         if deviceIndex == 0 or (deviceIndex < gameCfg[_KEY_NUMPLAYERS] and not gameCfg[_KEY_ALTERNATING]):
+            
+            # Normal fash flash 
+            cmd = "off all; flash 4 %d %s; on %s;" % (_FLASH_INTERVAL, controllerButtons, controllerButtons)
+
             # Flash the buttons to tell the user a default was used
             if enableFallbackFlashIndicator and args.noflash == False:
-                sendCommand(ttyDevice.device, "off all; flash 2 %d %s; on %s;" % (_FLASH_INTERVAL*3, controllerButtons, controllerButtons), args.printonly)
-            elif args.noflash == False:
-                # Quick-Flash the buttons to indicate an accurate mapping
-                sendCommand(ttyDevice.device, "off all; flash 4 %d %s; on %s;" % (_FLASH_INTERVAL, controllerButtons, controllerButtons), args.printonly)
+                cmd = "off all; flash 2 %d %s; on %s;" % (_FLASH_INTERVAL*3, controllerButtons, controllerButtons)
+            
+            sendCommand(ttyDevice.device, cmd, args.printonly)
+
         else:
             sendCommand(ttyDevice.device, "off all", args.printonly)
 
