@@ -32,7 +32,7 @@ SOFTWARE.
 
 #define PIN_ONBOARD_LED     13
 #define GPIO_DELAY_MS   4
-const char* PROGRAM_NAME  =  "ArcadeIlluminate (v1.0)";
+const char* PROGRAM_NAME  =  "Event Horizon - Illuminate (v2.0a)";
 
 
 TaskHandle_t handleTaskJoystick;

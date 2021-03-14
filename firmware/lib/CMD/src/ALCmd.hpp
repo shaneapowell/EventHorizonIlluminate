@@ -40,6 +40,7 @@ Commands:\n\
   flash  <count> <interval> <buttons>    - Flash the LEDs <count> times.\n\
   seq    <animation>                     - Run the named animation sequence.\n\
   dump                                   - Print system process info.\n\
+  bootloader                             - Restart into bootloader mode.\n\
   help                                   - Print this help\n\
 \n\
 Options:\n\
@@ -86,6 +87,7 @@ class ALCmd
             _cmdFlash = _cli.addBoundlessCommand("flash");
             _cmdSeq = _cli.addSingleArgumentCommand("seq");
             _cmdDump = _cli.addCommand("dump");
+            _cmdBootloader = _cli.addCommand("bootloader");
             _cmdHelp = _cli.addCommand("help");
 
         }
@@ -140,6 +142,7 @@ class ALCmd
                         if (cmd == _cmdFlash) _flashCommand(cmd.getPtr());
                         if (cmd == _cmdSeq) _seqCommand(cmd.getPtr());
                         if (cmd == _cmdDump) _fptrMonitorDump();
+                        if (cmd == _cmdBootloader) _resetToBootloader();
                         if (cmd == _cmdHelp) _helpCommand();
 
                        
@@ -180,6 +183,7 @@ class ALCmd
         Command _cmdFlash;
         Command _cmdSeq;
         Command _cmdDump;
+        Command _cmdBootloader;
         Command _cmdHelp;
 
         char _serialBuffer[CMD_SERIAL_BUFFER_SIZE];   // an array to store the received data
@@ -335,6 +339,14 @@ class ALCmd
 
         }
 
+        /*****************************************************************
+         * Reboot SAMD21 into bootloader mode for firmware updates.
+         ****************************************************************/
+        void _resetToBootloader() 
+        {
+            *(uint32_t *)(0x20000000 + 32768 -4) = 0xf01669ef;     // Store special flag value in last word in RAM.
+            NVIC_SystemReset();    // Like pushing the reset button.
+        }
 
         /*****************************************************************
          * respond to the "help" command.

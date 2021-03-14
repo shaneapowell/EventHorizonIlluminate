@@ -221,12 +221,12 @@ def findSerialDevices(vid, pid):
 '''
 def main():
     parser = argparse.ArgumentParser(description="Game Console LED Controller. To manually test lights, use 'TEST' for <system> and the button name from the 'USB' section in the config.\n\n example:  illuminate.py -d TEST B3")
-    parser.add_argument("-c", "--config", dest="configdir", default=os.path.dirname(os.path.realpath(__file__)), help="Path to location of all xml conf files. Default is the directory this script is located.")
+    parser.add_argument("-c", "--config", dest="configdir", default=os.path.dirname(os.path.realpath(__file__)), help="Path to location of all .ini conf files. Default is the directory this script is located.")
     parser.add_argument("-p", "--printonly", action="store_true", default=False, help="Print result only, don't send LED lightup commands through i2c bus")
     parser.add_argument("-d", "--debug", action="store_true", default=False, help="Enable Debugging logging.")
     parser.add_argument("-f", "--noflash", action="store_true", default=False, help="Force disable flashing of lights when button LEDs are enabled")
-    parser.add_argument("system", help="The name of the emulator system being run. eg.. 'mame-mame4all', 'psx', 'snes'...etc.  Use 'TEST' to test specific buttons.")
-    parser.add_argument("rom", help="The rom being run. When using the 'TEST' emulator option, pass in B1 to B16 to manually turn on a LED")
+    parser.add_argument("system", help="The name of the emulator system being run. eg.. 'arcade', 'psx', 'snes'...etc. Use 'identify' for help finding your controllers")
+    parser.add_argument("rom", help="The rom being run. When using the 'identify' system option, pass in 'controllers' to find your controllers, or B1 to B16 to manually turn on a LED")
     args = parser.parse_args()
         
     global _basePath
@@ -259,6 +259,7 @@ def main():
             for ttyDevice in controlerTTYDevices:
                 deviceIndex += 1
                 sendCommand(ttyDevice.device, "flash %d 500 all" % (deviceIndex),  args.printonly)
+                time.sleep((1+ deviceIndex) * (500 / 1000))
         elif romName.startswith("C"):
             deviceIndex = int(romName[1:])
             ttyDevice = controlerTTYDevices[deviceIndex-1]
@@ -311,7 +312,7 @@ def main():
         if deviceIndex == 0 or (deviceIndex < gameCfg[_KEY_NUMPLAYERS] and not gameCfg[_KEY_ALTERNATING]):
             
             # Normal fash flash 
-            cmd = "off all; flash 4 %d %s; on %s;" % (_FLASH_INTERVAL, controllerButtons, controllerButtons)
+            cmd = "off all; flash 3 %d %s; on %s;" % (_FLASH_INTERVAL, controllerButtons, controllerButtons)
 
             # Flash the buttons to tell the user a default was used
             if enableFallbackFlashIndicator and args.noflash == False:
