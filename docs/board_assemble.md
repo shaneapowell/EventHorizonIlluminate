@@ -6,9 +6,9 @@
 
 ## Order from JLCPCB
 I have ready-to-go Gerber, BOM and PNP files that can be used on [JLCPCB.com](https://jlcpcb.com/).  I used these to build my batch of 10. All 10 came out perfectly. In the near future I plan to have a number of batches made by JLCPCB and sold as DIY Kits.
-- [Gerber .zip file](docs/pcb_gerber.zip)
-- [BOM .csv file](docs/pcb_bom.csv)
-- [PickNPlace .csv file](docs/pcb_pnp.csv)
+- [Gerber .zip file](pcb_gerber.zip)
+- [BOM .csv file](pcb_bom.csv)
+- [PickNPlace .csv file](dpcb_pnp.csv)
 
 ## Parts Needed
 - [Event Horizon Circuit Board](https://oshwlab.com/shaneapowell/arcadeilluminatev3)
