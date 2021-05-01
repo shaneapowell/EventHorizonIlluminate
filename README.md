@@ -1,7 +1,8 @@
 
 
 # Event Horizon - Illuminate Joystick Controller 
-Last Updated (Mar 13 2021)
+Last Updated (May 1 2021)
+This project is now back into active development.  The software and hardware is pretty much ready to go. The documentation is still being worked on, but it should be enough to get most people started.
 
 Like many of us, I was annoyed by the lack of LED control from the standard zero-delay joystick conrol boards.  All they did was light up every button LED.  I wanted to light up only the buttons that were used for any given game.   Since I couldn't find any inexpensive control boards that could do it, I made my own.
 
