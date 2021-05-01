@@ -45,14 +45,18 @@ On the left what I received back from JLCPCB. On the right, a completed board.
 
 [Install and Setup (Wires, firmware & software)](docs/install_and_setup.md)
 
+[Add/Update System & Game button led settings](docs/game_config.md)
+
 
 # External RESOURCES:
 - http://forum.arcadecontrols.com/index.php/topic,98241.0.html
 - https://retropie.org.uk/forum/topic/1550/led-controller-that-works-with-retropie/13
 
 
-# TODO / Wishlist:
-- add usbhid.jspoll=1 to /boot/config.txt
+# TODO / Wishlist / Future Upgrades:
+- Provide an automatic package installer for retropie systems.
 - Add auto-config support to retro arch? (https://github.com/libretro/retroarch-joypad-autoconfig/blob/master/hid/8BitDo_Zero2_gamepad_BT.cfg)
 - command-line firmware update
 - command-line game configuration update
+- Ready Made complete `.zip` archive for easier install.
+- Ready Made complete `.zip` archive for easier updates.

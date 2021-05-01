@@ -1,12 +1,12 @@
 # Install and Setup
 Install and Setup of an Event Horizaon board is broken into 4 distinct parts.
-- The Wiring
+- The Wiring and Install
 - The Event Horizon Illumiate Firmware
 - RetroPie Control Software. 
 
 Knowledge of the Linux Command line is not necessary, but will beneficial for testing and diagnostics and troubleshooting.
 
-# The Wiring
+# The Wiring and Install
 The configuration files provided by default are configured to expect the buttons and joystick to be connected into the control board ports in the same order as they are listed here.  If you can connect your buttons in this order, it will be much easier to use the software out of the box.  There will be little, to no configuration changes needed.
 - B1 = Button 1 (B)
 - B2 = Button 2 (A)
@@ -151,7 +151,7 @@ Congratulations.. all the necessary software is installed and ready to go.  Incl
 If you restart EmulationStation, or restart your system, initially all lights should light up. Once emulation station starts however, the buttons A&B should quickly flash 2x to show that emulation station is ready to go.
     
 # SETUP / CONFIGURE
-Out of the box, most of the default settings and configurations should work as is.  Ideally, it will be far easier to change the connected 
+Out of the box, most of the default settings and configurations should work as is.  Ideally, it will be far easier to change the connected USB port, or connected button port than to alter the default configuration settings.
 
 ## Identify and Set Order of Each Controller
 If you have more than 1 Event Horizon Illuminate control boards installed on your system, the order they are detected will be important.   The `illuminate.py` software that sends commands to the boards to control the LEDs, identifies each board as Player 1, Player 2, Player 3.. etc, based on the order of the hardware USB ports they are connected to.  You can identify which controllers are being found in which order by running the following from the command prompt
@@ -160,6 +160,18 @@ $ python3 /opt/retropie/configs/event-horizon/illuminate.py identify controllers
 ```
 Player 1 will flash all buttons once, Player 2 will flash al buttons twice... etc.
 
+Alternatively, you can also calculate which controller should be identified as 1 and 2 based on the USB `hardware location`.  The USB location is the unique number value assigned to each USB port on your system.  These location values look something like `1-1.3:1.0`.  The `illuminate.py` script sorts your controlers by this location value.  You can manually determine which of your controllers is connected to which unique USB location ahead of time if desired.
+- Unpug both controllers USB cables.
+- Plug in one controller.
+- From the terminal command prompt run the command `dmesg`.
+- You should see the most recent device message at the bottom.  It should contain a line with a `ttyACM0` value in it.  As well as the USB location value similar `1-1.3:1.90`.
+- Plug in your 2nd controllers USB cable.  
+- Again, run the `dmesg` command and again look for the additional `ttyACM1` device, and it's USB location value.
+
+You now have 2 unique location values.  These values do not change when your raspberry pi reboots.  They are hardware locations.  The order the `illuminate.py` script sorts your devices is a simple `alphanumeric` order of those 2 values.  In the case of my personal system I have the following location values, in the following order.
+- `1-1.2:1.0`  (ttyACM0)
+- `1-1.3:1.0`  (ttyACM1)
+
 ---
 ## Identify The buttons
 You can also identify and test each button on each controller.  Run the following command to flash Button 1, then Button 2, and Button 3. on all controllers.
@@ -167,6 +179,9 @@ You can also identify and test each button on each controller.  Run the followin
 $ python3 /opt/retropie/configs/event-horizon/illuminate.py identify B1
 $ python3 /opt/retropie/configs/event-horizon/illuminate.py identify B2
 $ python3 /opt/retropie/configs/event-horizon/illuminate.py identify B3
+...
+$ python3 /opt/retropie/configs/event-horizon/illuminate.py identify B12
+
 ```
 You can do the above for all LED connected buttons to ensure you have all buttons in the order you expect, and also that all controllers have all of their buttons in the same button port.
 
@@ -176,7 +191,10 @@ Each controller presents itslef to retropie as both a `Joystick Input device`, a
 ```
 miniterm /dev/ttyACM0
 ```
-To quit miniterm, type `CTRL-]`
+To quit miniterm, type `CTRL-]`.  For help while connected type `help` and hit enter.
+
+## Configure Retro Pie
+At this point, you should be ready to setup `Emulation Station` and `MAME` to use your new controller boards.  Follow the usual steps in Emulation Station to configure your boards, and the steps to configure your controllers within MAME.  These steps are beyond the scope of this document.
 
 # TROUBLESHOOTING
 - Check the output of illuminate.py when manually running it at the command prompt.  
